@@ -1,0 +1,326 @@
+0.5
+===
+
+	* scripts: removed the special support for giving an empty voice_email/
+	  fax_email parameter. This is NOT allowed any more and will result in
+	  an error when sending the mail. Simply don't set these parameters
+	  any more if you don't need them!
+
+	* scripts: remote inquiry now uses correct female form ("eine Nachricht"
+	  instead of "eins Nachricht", thx to Eckhard Rggeberg and J�g Fester)
+
+	* scripts: capisuitefax now submits a single job if several
+	  files are given (implemented by Hartmut Goebel, fixes bug #38)
+
+        * scripts: New script capisuite-checkconfig for checking the
+          configuration (thx to carsten@capimin.cbclass.net for the
+          idea and a first version, improved by Hartmut Goebel).
+
+	* core: major refactoring of the Python based interface has
+          been done. Now a complete new Python module library
+          implements a lot of useful functions and offers handy
+          abstractions. (planned and implemented by Hartmut Goebel)
+
+	* scripts: the mails sent can now be configured in the special sections
+	  MailFaxReceived, MailFaxSent, MailFaxFailed and MailVoiceReceived in
+	  answering_machine.conf and fax.conf (implemented by Hartmut Goebel)
+
+	* scripts: the mails sent with received voice and fax calls will now
+	  contain some general information like length of calls, number of
+	  pages, etc. (thx to Achim Bohnet and Thomas Niesel for the feature
+	  requests; closes bug #6 finally)
+
+	* core: the Python functions switch_to_faxG3, fax_receive, fax_send,
+	  audio_send and audio_receive now return some informational data about
+	  the transfer
+
+	* core: the Python functions will now only throw the CallGoneError
+	  exception when a hangup is NOT expected; this means many functions
+	  like faxReceive() will now finish normally when no call abort happens
+
+	* core: accept incoming color faxes now
+
+	* started a detailed ChangeLog file from 2003-10-05. From now on, NEWS
+	  should only contain important changes from a user's point of view, while
+	  ChangeLog records all changes in detail.
+
+0.4.5
+=====
+
+	* documentation: 5 man pages are now also created: capisuite(8),
+	  capisuite.conf(5), fax.conf(5), answering_machine.conf(5),
+	  capisuitefax(1) (fixes bug #13, thx to Achim Bohnet for reporting)
+
+	* scripts: prevent cropping of fax pages by auto-scaling
+
+	* scripts: use a SMTP connection to localhost instead of calling the
+	  sendmail binary for sending mails. Many reports showed that calling
+	  sendmail manually doesn't work well on quite some systems
+
+	* scripts: capisuitefax now also accepts PDF files (thx to Jochen Meyer
+	  and Eckhard Rggeberg for reporting)
+
+	* core: behave correctly when DATA_B3_CONF messages come early (thx to
+	  Karsten Keil for analyzing and a nice fix!)
+
+	* core: fixed a bug which could lead to a crash when some unexpected
+	  CAPI messages arrived (thx to Karsten Keil for analyzing)
+
+	* core: fixed compile problem with new capi4linux library
+
+	* core: fixed a crash which could be caused by wrong DDI parameters
+	  in capisuite.conf
+	
+	* scripts: Adapted to work with the new parameters of sfftobmp 3.x.
+	  Normally, installed version will be detected automatically when 
+	  building CapiSuite. If you change your sfftobmp version later,  
+	  you'll have to adapt the function sfftotif at the beginning of
+	  cs_helpers.py manually.
+
+	* scripts: added new options "fax_email_from" and "voice_email_from" to
+	  answering_machine.conf and fax.conf (thx to Achim Bohnet for submitting
+	  a patch with this feature!; closes bug #46)
+	
+	* core: use shorter, more readable format for Python traceback logging
+
+0.4.4
+=====
+
+        * Makefiles: fixed "make" to not trying to create directories any more -
+          this prevented normal users to call "make" sometimes (thx to Steffen
+          Barszus for the detailled report)
+
+        * scripts: added new non-error ISDN cause (0x349f) to fax send routine.
+          It was wrongly understood as an error before and therefore leading to
+          repeated fax sends (thx to Stefan Brandner for reporting)
+
+        * scripts: fixed a bug which lead to a connection abort when the
+          answering machine recognized an incoming fax call (thx to Andreas
+          Scholz and Harald Jansen)
+
+        * scripts: fixed a bug which under some circumstances caused an error
+          message when fax_numbers was not set for a user
+
+        * scripts: received voice calls are now converted to 16 bit WAV files
+          instead of 8 bit; this leads to a dramatically better playback quality
+          for the sound files attached to the sent mails (thx to Holger Krull
+          for the fix; closes bug #51)
+
+        * core: support for ISDN lines with DDI (means you only have one base
+	  number - not a list of MSNs - and can define extensions how you like;
+	  in Germany used in the "Anlagenanschluss"). We now have three new
+	  DDI_* options in capisuite.conf. Many thanks goes to J�g Fester and
+	  the x-dot GmbH for paying and supporting me to develop this feature.
+	  They use CapiSuite in their product (see http://www.x-manage.de).
+
+0.4.3 (CVS tag CAPISUITE_043):
+==============================
+
+	* scripts & core: support color fax reception (bug #22, thx to
+	  Axel Schneck)
+
+	* scripts: added missing file "unbekannt.la" to install targets in
+	  Makefiles (thx to Wolfgang Dollendorf)
+
+	* scripts: added missing "+.la" which is necessary for the remote
+	  inquiry of recorded international calls (bug #27)
+
+	* scripts: fax_numbers may be now left empty in fax.conf. This makes
+	  it possible to use one MSN for receiving/sending faxes and voice
+	  calls (fax sending was refused up to now if fax_numbers was empty).
+	  (bug #23)
+
+	* scripts: number of needed tries reported after sending a fax was
+	  wrong (bug #29, thx to Eckhard Rggeberg)
+
+	* scripts: fax jobs can be given a literal addressee and a subject
+	  for informational purposes now (bug #18 reported by Achim Bohnet)
+
+	* core: fax headline is now converted to the right charset internally,
+	  so that special characters like german umlauts are working now
+	  (thx to Eckhard Rggeberg for reporting)
+
+	* scripts: Sander Roest found a workaround for the odd Python error
+	  "cannot unmarshal code objects in restricted execution mode" which
+	  mainly hit Redhat users for any reason beyond my understanding and
+	  prevented CapiSuite from sending mails sometimes/always...
+
+	* switched from BerliOS bug tracker to Mantis installed on http://www.
+	  capisuite.de
+
+0.4.2 (CVS tag CAPISUITE_042):
+==============================
+	* manual now available as PDF
+
+	* scripts: fixed an overflow in cs_helpery.py which caused hangs for
+          the receive of long (more than about 40 pages) fax documents
+
+	* scripts: fixed a bug in idle.py which caused a fax send delay of one
+	  hour when daylight saving time is in effect
+
+	* scripts: attachments to sent e-mails now get a valid filename
+
+	* scripts: the *_email settings from fax.conf and answering_machine.conf
+	  now allow to set multiple addresses to send the mails to
+
+	* scripts: the "*_numbers" settings from fax.conf and answering_machine.conf
+	  now support the special sign "-" for "no destination number available"
+	  (e.g. needed for the austrian "Global Call")
+
+	* scripts: capisuitefax now handles filenames and dialstrings with
+	  special chars (spaces etc.) correctly
+
+	* scripts: new parameter "--user" added to capisuitefax; thx to Wolfgang
+	  Eul for the patch!
+
+	* core: use "-" instead of "??" for "no number available", e.g.
+	  important for the call_from and call_to parameters of scripts
+
+	* core: small bug which lead to a wrong outgoing MSN in rare cases fixed
+
+0.4.1a (tag CAPISUITE_041a):
+============================
+	* fixed a bug in the rc-script of CapiSuite which made
+          "capisuite start" unfunctional in 0.4.1 (path of executable changed)
+
+	* included tests and changes for gcc-2.95, no patch necessary
+          any more to build CapiSuite with it
+
+	* CapiSuite now checks controller abilities and respects them
+          when connecting (e.g. use extended fax protocols if available)
+	  -> this also works around a severe crash with AVM drivers when
+             transmitting a fax to/from some analog devices
+
+	* fixed SECURITY bug in cronjob which allowed every CapiSuite user
+          to become root. Sorry... :-((
+
+0.4.1 (tag CAPISUITE_041):
+==========================
+	* cron script: redirect error output to /dev/null
+
+        * core: cosmetical code improvements to make old gcc-2.95 more happy
+        * core: fixed problems when doing "make install" to an arbitrary prefix
+        * core: moved "capisuite" to <prefix>/sbin instead of bin
+
+	* scripts: fixed idle.py freezing which lead to CapiSuite not sending
+	  faxes any more after some time (#527)
+	* scripts: fixed remote inquiry: mixed new and old messages sometimes
+	* scripts: stricter permissions of received files and dirs (#544)
+	* scripts: new option dial_prefix implemented (#537)
+	* scripts: better check for options read from config files, (#531)
+	  many options are optional now with a resonable default
+	* scripts: capisuitefax shebang corrected (#536)
+
+Thanks goes mainly to Achim Bohnet and Dieter Pelzel for reporting bugs
+
+0.4 (first public release, tag CAPISUITE_04):
+=============================================
+	* added cron script for cleaning up spool dirs
+	* fixed bug in rc.capisuite (was also started when not configured)
+	* scripts: remote inquiry supports new and old messages now
+	* scripts: capisuitefax can show sendqueue and delete jobs now
+
+0.3.2 (internal release):
+========================
+	* core: finally got rid of the CommonC++ library:
+		- threading implemented using native pthread_* calls
+		- rewritten CapiSuite::parseConfigFile() to use STL strings
+		- changed Connection class to use pthread_mutex_*
+	* scripts: fixed bug which lead to hanging processes of externally
+	  started progs like sendmail
+	* scripts: minor fixes
+
+0.3.1 (internal release):
+=========================
+	* dist: included spec and init file in CVS and dist
+	* scripts: use different sendqueues for each user
+	* core: fixed some bugs:
+		- capisuite.error() didn't work,
+		- logging in outgoing connections didn't work
+		- callingParty wasn't set correctly
+	* scripts: answering machine switches to fax when incoming service
+	  indicator says fax
+	* scripts: sayNumber can now handle all numbers from 0 to 99, so all
+	  dates and times are now said nearly correctly for the remote inquiry
+	* scripts: fixed a typo in incoming.py
+	* docs: added ISDN/CAPI error codes to manual
+
+0.3 (internal release):
+=======================
+	* split up script configuration in two files (anwering machine, fax),
+	  some new features configurable now (e.g. actions)
+
+0.2.1 (internal release):
+=========================
+	* many document improvements (new DocBook manual)
+
+0.2 (internal release):
+=======================
+	* log improvements: log-level configurable (see capisuite.conf),
+	  appending log-file instead of re-creating
+	* configure allows to set docdir with --with-docdir
+	* CapiSuite can be finished using Ctrl-C and SIGTERM nicely
+	* very limited support for reload (kill -1) - only re-activates
+	  de-actived idle script yet, no reload of configuration
+	* all configuration for the scripts put in own config file
+	* support for various new configuration options, multi-user-ready
+	  scripts (different user dirs in spool_dir/users)
+	* audio_receive does truncate recorded silence away
+	* remote inquiry supports recording of own announcement
+	* commandline option "-d" runs CapiSuite as daemon
+	* new python commands: capisuite.log and capisuite.error let scripts
+	  write messages to the CapiSuite log and error log
+	 
+0.1 (internal release):
+=======================
+	* "make install" and "make dist" work now, use config.h
+	* added main docu page for doxygen
+	* added capisuitefax-script (command line tool for sending faxes)
+	* added support for sending faxes in idle.py
+	* added support for "capisuite.conf" (global configuration file)
+	* capisuite can write its output to logfiles now
+	* faxsend module added, new python function fax_send()
+	* idle script will be disabled after 10 subsequent errors
+	* B3 disconnect cause now returned by disconnect() python function
+
+0.03 (internal release):
+========================
+
+	* improvement in idle script handling, own class for it (IdleScript)
+	* new classes for Python script handling (PythonScript) and derived
+	  classes (IncomingScript & IdleScript)
+	* new python functions call_voice and call_faxG3 to initiate outgoing
+	  calls
+	* changed python exception handling to allow multiple calls in one
+	  script to be handled correctly
+	* python functions disconnect() and reject() wait for complete
+	  disconnection and return the disconnect cause now
+	* assure nice disconnection in any error case (hopefully)
+	* when error occured in script, physical connection is finished
+	  immediately leading to an error visible at the sending side (e.g.
+	  when using the fax protocol)
+	* cleaned up python reference counting and threads, no known memory
+	  leaks any more
+	* many changes to support outgoing calls (new module, small changes)
+	* Connection objects will be destroyed by application level now so
+	  dangling pointers are avoided
+	* exception handling generally improved
+
+0.02 (internal release):
+========================
+
+	* many bug fixes as usual (SEGV, ...)
+	* service constants SERVICE_VOICE, SERVICE_FAXG3 and SERVICE_OTHER
+	  available in python now, no need to use CIP values any more
+	* audio_send and audio_receive return length in seconds now
+	* added support for idle script which can initiate outgoing calls
+
+0.01 (internal release):
+========================
+
+	* changed name from CapiCom to CapiSuite (name conflict with MS crypto
+	  API)
+	* added doxygen-created documentation for classes and python exported
+	  functions
+	* get_DTMF() was renamed to read_DTMF() and can wait for DTMF now
+	* connect_telephony() renamed to connect_voice()

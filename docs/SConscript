@@ -1,0 +1,98 @@
+# -*- python -*-
+
+Import('env', 'is_dist')
+
+import re
+
+#---- man pages -----------
+env.Alias('install-man',
+          env.InstallMan(Split('capisuite.8 capisuite.conf.5 fax.conf.5 '
+                               'answering_machine.conf.5 capisuitefax.1')))
+
+env.ExtraDist(Split('Doxyfile.in mainpage.doxy manual.docbook '
+                    'manual-de.docbook manual.README'))
+
+
+# todo:
+# - find stylesheet dir (how?)
+# - build manpages from manual.docbook
+# - build pdf-manual from manual.docbook
+# - build html-manual from manual.docbook
+
+def patch_version(target, source, env):
+    """
+    Change version contained in the <title> tag.
+    This is done in-place to avoid yet another .in file.
+    """
+    text = source[0].get_contents()
+    text = re.sub(r'<title>CapiSuite [\w.]*</title>',
+                  r'<title>CapiSuite %s</title>' % env['VERSION'],
+                  text)
+    open(source[0].abspath, 'w').write(text)
+
+env.Append(docbuilddir=Dir('.'))
+
+manualdir = Dir('manual')
+#stylesheetdir = Dir('/usr/share/sgml/docbook/xsl-stylesheets')
+
+stylesheetdir = Dir('/usr/share/xml/docbook/stylesheet/nwalsh/current/')
+profile_xsl = File("profiling/profile.xsl", stylesheetdir)
+docbook_xsl = File("manpages/docbook.xsl", stylesheetdir)
+
+#images = Install(Dir('images', manualdir), images)
+
+"""
+# create HTML manual
+manual_html = env.Command('manual/index.html', 'manual.docbook', [
+    patch_version,
+    'xmllint --noout --valid $SOURCE',
+    ['xsltproc', '-o', '${TARGET.dir}/',
+     File('xhtml/chunk.xsl', stylesheetdir), '$SOURCE'],
+    Delete('${TARGET.dir}/images'),
+    Copy('${TARGET.dir}/images', Dir('images', stylesheetdir).abspath),
+    ])
+
+# create PDF manual
+db_xml = env.Command('manual.xml', 'manual.docbook',
+                     'xsltproc --stringparam profile.condition pdf '
+                           '-o $TARGET $profile_xsl $SOURCE')
+manual_pdf = env.Command('manual.pdf', db_xml,
+                         ['db2pdf -o ${TARGET.dir} $SOURCE',
+                          #Delete(Split('CATALOG.local manual.aux manual.log '
+                          #             'manual.out manual.tex suse-*.dsl '
+                          #             'manual.xml')
+                         ])
+
+# substitute version, capisuite_sources, srcdir
+doxyfile = env.FileSubst('Doxyfile', 'Doxyfile.in')
+reference_html = env.Command('reference/index.html', doxyfile, [
+    Delete('${TARGET.dir}'),
+    ['doxygen', doxyfile]
+    ])
+
+
+#--- build man pages ------------------
+db4man = env.Command('manual-4man.docbook', 'manual.docbook',
+                     'xsltproc --stringparam profile.condition man '
+                           '-o $TARGET $profile_xsl $SOURCE')
+manpages = env.Command(Split('capisuite.8 capisuite.conf.5 fax.conf.5 '
+                             'answering_machine.conf.5 capisuitefax.1'),
+                       db4man,
+                       'xsltproc $docbook4man_xsl $SOURCE')
+
+#--- install ---
+
+for i in  (env.Install('$docdir', manual_pdf),
+           #env.Install('$docdir', manual_html),
+           #env.Install('$docdir', reference_html),
+           ):
+    env.Alias('install', i)
+
+
+#--- dist ---
+
+## for t, s in ((env.Dir('${DISTDIR}/manual'), manual_html),
+##              (env.Dir('${DISTDIR}/reference'), reference_html),
+##              ('${DISTDIR}/manual.pdf', manual_pdf)):
+##     env.Command(t, s, Copy('$TARGET', '$SOURCE'))
+"""

@@ -1,0 +1,47 @@
+# -*- python -*-
+"""
+Options for building CapiSuite
+
+(c) Copyright 2004 by Hartmut Goebel <h.goebel@crazy-compilers.com>
+"""
+
+# default prefix
+prefix = '/usr/local'
+oldincludedir = '/usr/include'
+
+opts = Options('options.cache', ARGUMENTS)
+opts.AddOptions(
+  # Installation directories:
+  ('prefix',    'install architecture-independent files in prefix', prefix),
+  ('execprefix','install architecture-dependent files in execprefix','$prefix'),
+
+  # Fine tuning of the installation directories:
+  ('bindir',        'user executables',         '$execprefix/bin'),
+  ('sbindir',       'system admin executables', '$execprefix/sbin'),
+  ('libexecdir',    'program executables',      '$execprefix/libexec'),
+  ('datadir',       'read-only architecture-independent data','$prefix/share'),
+  ('sysconfdir',    'read-only single-machine data',  '$prefix/etc',),
+  ('sharedstatedir','modifiable architecture-independent data','$prefix/com',),
+  ('localstatedir', 'modifiable single-machine data', '$prefix/var'),
+  ('libdir',        'object code libraries',          '$execprefix/lib'),
+  ('includedir',    'C header files',                 '$prefix/include'),
+  ('oldincludedir', 'C header files for non-gcc',     oldincludedir),
+  ('infodir',       'info documentation',             '$prefix/info'),
+  ('mandir',        'man documentation',              '$prefix/man'),
+
+  # install into another filesystem base
+  ('INSTALL_BASE',   'base dir for installation (usefull for RPMs)', '/'),
+  #('KEEP_CONFIG',    'Do not install config files (usefull for development)',
+  #                   0),
+
+  # this is a capisuite-special (CS_SET_DOCDIR)
+  ('docdir',        'other documentation',         '$datadir/doc/capisuite'),
+  )
+
+Import(['env', '__targets__'])
+opts.Update(env)
+Help(opts.GenerateHelpText(env) + __targets__)
+if env.has_key('INSTALL_BASE'):
+    if str(env['INSTALL_BASE']) in ('/', ''):
+        del env['INSTALL_BASE']
+opts.Save('options.cache', env)

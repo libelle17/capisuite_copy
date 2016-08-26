@@ -1,0 +1,16 @@
+# -*- python -*-
+
+import os, fnmatch
+Import('env')
+
+def findFiles(pattern, subdir=''):
+    files = []
+    for file in os.listdir(os.path.join(Dir('.').srcnode().abspath, subdir)):
+        if fnmatch.fnmatch(file, pattern):
+            files.append(File(os.path.join(subdir, file), Dir('.')))
+    return files
+
+env.Alias('install', [
+    env.Install('$pkgdatadir', 'README' ),
+    env.Install('$pkgdatadir', findFiles('*.la'))
+    ])

@@ -1,0 +1,93 @@
+# $Id: capisuite.conf.in,v 1.3 2004/01/10 14:16:40 gernot Exp $
+#
+# This is the global configuration file for CapiSuite
+#
+# Some general options will be set here, which define which scripts
+# to use, when to start them and what to log and where.
+#
+# All other options are defined in the python scripts given here
+# or (preferably) are read from them from some other configuration
+# files.
+#
+# As usual, lines starting with # or empty lines will be ignored 
+#
+# The rest must be key value pairs written as key=value.
+#
+# Additional whitespaces and quotation marks (") surrounding
+# the values will be ignored.
+
+# incoming_script
+#
+# This python script will be called when an incoming call occurs.
+#
+# It must define a python function named "callIncoming".
+#
+incoming_script="@pkglibdir@/incoming.py"
+
+# idle_script
+#
+# This python script will be called in regular intervals giving
+# you the ability to search for needed actions (like send fax)
+# in a queue (or somewhere else) and initiate the calls.
+#
+# It must define a python function named "idle". It's allowed
+# to use the same script for incoming_script and idle_script
+#
+idle_script="@pkglibdir@/idle.py"
+
+# idle_script_interval
+#
+# The given idle_script will be called in regular intervals.
+#
+# The length of the intervals in seconds is given here. If you
+# don't want to use an idle script, set it to "0"
+#
+idle_script_interval="30"
+
+# log_file
+#
+# The file given here is used for writing normal log messages to.
+#
+log_file="@localstatedir@/log/capisuite.log"
+
+# log_level
+#
+# Selects how chatty CapiSuite will be:
+#
+# 0 = only very few messages (e.g. system start/stop)
+# 1 = some important messages (e.g. connection start/end)
+# 2 = many debug messages (nearly every CAPI message logged)
+# 3 = all debug messages (all CAPI messages - include every transmitted data package, every script execution)
+log_level="1"
+
+# log_error
+#
+# The file given here is used for writing error messages to.
+#
+# Error messages are separated so you can easily find them.
+#
+log_error="@localstatedir@/log/capisuite.error"
+
+# DDI_base, DDI_length and DDI_stop_numbers
+#
+# The following two options are only important if you've your ISDN card connected
+# to an ISDN interface which is configured in "Point to Point"-mode (in Germany
+# this is called "Anlagenanschluss"). This means you don't have several
+# specific numbers (so called MSNs) but only one base number and you can define
+# extensions as you like. As the length of these extensions is up to you, CapiSuite
+# can't know it. Therefore you must configure it here. Sometimes, there are also
+# shorter numbers you want to allow, for example the extension "0" instead of "000".
+# These extension numbers can be listed (separated by commas) in DDI_stop_numbers. 
+#
+# If you don't understand what this all means, then you most likely have no PtP 
+# interface and you can leave the default values.
+# 
+# As an example, if you've numbers like 12345-123 and 12345-111, then your 
+# DDI_base_length would be "5" and DDI_length would be 3. If you also want to
+# receive calls to 12345-0, you should set DDI_stop_numbers to "0".  
+#
+# A value of 0 for DDI_length disables this feature and the other settings are
+# ignored then (default).
+DDI_length="0"
+DDI_base_length="0" 
+DDI_stop_numbers=""

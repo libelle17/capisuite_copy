@@ -1,0 +1,312 @@
+2004-12-30  Hartmut Goebel  <h.goebel@crazy-compilers.com>
+	* scripts/cs_helpers.pyin: Changed sfftotiff to be defined
+	  depending on @sfftobmp_major_version@ during runtime. This
+	  switch is made based by a compiletime substitution of
+	  sfftobmp_major_version. This change avoids problems which the
+	  old substitution may have cause ('#3' is an extremly short
+	  replacement pattern).
+	* scripts/Makefile.am (.pyin.py): Likewise. Remove old
+	  substitutions.
+
+2004-11-28  Gernot Hillier  <gernot@hillier.de>
+	* docs/manual.docbook: update to new features of 0.4.5, mention the 
+	  mISDN project, mention other binary packages besides SUSE/Debian,
+	  kick out old Debian documentation, replace occurences of CVS with
+	  SVN, remove requirement of autotools for SVN build, mention
+	  Docbook/XML tools, include documentation for DDI, add update
+	  chapter
+	* docs/manual-de.docbook: Likewise.
+	* docs/Makefile.am: add generation of documentation tar-balls and 
+	  german docu
+
+2004-11-26  Gernot Hillier  <gernot@hillier.de>
+	* docs/Makefile.am: add man-pages to distribution, hopefully finally
+	  avoid to have them created during normal build
+	* docs/manual.docbook.in: renamed to manual.docbook again
+
+2004-11-07  Gernot Hillier  <gernot@hillier.de>
+	* configure.in: test for the sfftobmp version installed
+	* acinclude.m4 (CS_TEST_SFFTOBMP): Likewise.
+	* scripts/cs_helpers.pyin (sfftotiff,sendMIMEMail): New function which
+	  calls sfftobmp so that the parameters can be easily changed. Include
+	  two versions for sfftomp 2.x and 3.x. Thanks for reporting this
+	  issue goes to Edelhard Becker.
+	* scripts/Makefile.am (.pyin.py): Choose the right sfftobmp call
+	  automatically during build.
+	* scripts/cs_helpers.pyin (sendMIMEMail): add parameters to tiff2ps, gs
+	  and ps2pdf which prevent cropping of fax pages. Thanks to all the
+	  people who contributed suggestions and patches to bug #55.
+	* scripts/capisuitefax.in: Likewise.
+
+2004-10-25  Gernot Hillier  <gernot@hillier.de>
+	* src/capisuite-py/config.py.in: minor documentation changes
+	* src/capisuite-py/__init__.py: Likewise.
+	* src/capisuite-py/config.py.in (class NoGlobalSectionError): moved
+	  to exceptions.py
+	* src/capisuite-py/exceptions.py: Likewise.
+
+2004-09-04  Gernot Hillier  <gernot@hillier.de>
+	* scripts/cs_helpers.pyin (__sendmail, __call, sff2tif, cff2ps, 
+	  la2wav, sendMIMEMail): fix several bugs, answering machine now seems
+	  to work basically
+	* scripts/answering_machine.confin: update description of parameter 
+	  voice_email to new behaviour (empty string not allowed any more)
+	* NEWS: Likewise.
+
+2004-07-15  Gernot Hillier  <gernot@hillier.de>
+	* configure.in: support new parameter in ALERT_REQ of newer capi4linux
+	  versions, thx to Steffen Barszus for reporting and the fix
+	* src/backend/capi.cpp (Capi::alert_req): Likewise.
+	* acinclude.m4 (CS_TEST_CAPI4LINUX): Likewise. 
+
+2004-06-12  Gernot Hillier  <gernot@hillier.de>
+	* scripts/incoming.py (voiceIncoming): create file in received queue
+	  only if necessary (i.e. as late as possible)
+	* src/capisuite-py/fileutils.py (_releaseLock): ignore insignificant
+	  error resulting from race condition
+	* src/capisuite-py/voice.py (createReceivedJob): fix argument passing 
+	* scripts/cs_helpers.pyin (sendMIMEMail): stringify exception instance
+
+2004-06-10  Gernot Hillier  <gernot@hillier.de>
+	* src/backend/connection.cpp (info_ind_called_party_nr): prevent 
+	  CapiSuite from crashing when a too high DDIBaseLength was configured,
+	  thx to Michael Ressel for reporting and analyzing
+
+2004-05-18  Gernot Hillier  <gernot@hillier.de>
+	* docs/Makefile.am: remove PDF generation as it doesn't work currently;
+	  adapt Makefiles to only create man pages for "make dist"; break long 
+	  lines; ignore return values of rm commands
+	* docs/manual.docbook: renamed to manual.docbook.in; this was necessary
+	  to avoid using phony targets in man page creation
+	* docs/manual.docbook.in: see above.
+
+2004-05-10  Gernot Hillier  <gernot@hillier.de>
+	* src/capisuite-py/core.py (Call.log,Call.__init__,Call.reject,
+	  Call.disconnect): fix minor bugs in function calls, import some 
+	  additional symbols from _capisuite to our namespace, rename call_from
+	  and call_to attributes of class Call to from_nr and to_nr, don't set
+	  _handle to None after disconnect/reject 
+	* scripts/incoming.py (callIncoming,faxIncoming,voiceIncoming): rename
+	  call_from and call_to attributes of class Call to from_nr and to_nr;
+	  use them everywhere instead of old global variables
+	* src/application/capisuitemodule.cpp (convertConnRef,convertCapiRef): 
+	  improve misleading error message
+
+2004-04-18  Gernot Hillier  <gernot@hillier.de>
+	* scripts/capisuitefax.in: allow * and # in destination numbers
+
+2004-04-09  Gernot Hillier  <gernot@hillier.de>
+	* src/capisuite-py/core.py (Capi.call_voice,Capi.call_faxG3): fix
+	  some namespace problems and typos
+
+2004-04-04  Gernot Hillier  <gernot@hillier.de>
+	* configure.in: add support to install new capisuite Python module
+	* src/Makefile.am: Likewise
+	* src/capisuite-py/Makefile.am: Likewise (new file)
+	* src/capisuite-py/core.py (class Call): new method Call.log
+	* scripts/incoming.py (callIncoming,faxIncoming,voiceIncoming): use
+	  Call.log instead of core.log where appropriate
+
+2004-03-24  Gernot Hillier  <gernot@hillier.de>
+	* docs/Makefile.am: change pathes to Docbook stylesheets to reflect
+	  changes in SUSE 9.1
+	* docs/Makefile.am: create "make install" routines for manpages
+	* capisuite.spec: set mandir in configure call
+	* acinclude.m4: fix underquoted AC_DEFUN calls according to automake
+	  1.8 policy
+
+2004-03-23  Gernot Hillier  <gernot@hillier.de>
+	* docs/manual-de.docbook (capicodes_protocol): fix small typo
+
+2004-03-21  Hartmut Goebel  <h.goebel@crazy-compilers.com>
+	* scripts/fax.confin: Removed spaces from section names "Mail ...".
+	* scripts/answering_machine.confin: Likewise.
+	* scripts/incoming.py: Likewise.
+	* scripts/idle.py: Likewise.
+	* rc.capisuite.in: Likewise within a comment.
+	* scripts/incoming.py: Removed some outdated comments.
+
+2004-03-20  Gernot Hillier  <gernot@hillier.de>
+	* src/application/pythonscript.h (prefix): add support for short
+	  logging prefixes; use them for Python tracebacks (fixes bug
+	  #63, reported anonymously)
+	* src/application/pythonscript.cpp (prefix,run): Likewise.
+	* scripts/incoming.py: Fix typo.
+
+2004-03-19  Gernot Hillier  <gernot@hillier.de>
+	* scripts/idle.py: Remove old CVS history
+	* scripts/incoming.py: Likewise.
+	* scripts/incoming.py: changed some comments, moved connection
+	  accept code to voiceIncoming
+
+2004-03-14  Hartmut Goebel  <h.goebel@crazy-compilers.com>
+	* scripts/incoming.py: Use capisuite.core instead of _capisuite.
+	* src/capisuite-py/fax.py: Removed faxInfo2dict.
+	* src/capisuite-py/core.py: Added OO layer for _capisuite
+	  functions and classes Capi and Call.
+	* src/capisuite-py/core.py: New class FaxInfo.
+	
+2004-03-09  Hartmut Goebel  <h.goebel@crazy-compilers.com>
+	* SConstruct: new file for building with SCons build-system.
+	* SConscript: Likewise.
+	* SConscript-Config: Likewise.
+	* SConscript-Options: Likewise.
+	* docs/SConscript: Likewise.
+	* scripts/SConscript: Likewise.
+	* scripts/waves/SConscript: Likewise.
+	* src/SConscript: Likewise.
+	* src/application/SConscript: Likewise.
+	* src/backend/SConscript: Likewise.
+	* src/modules/SConscript: Likewise.
+	* src/application/capisuitemodule.cpp (capisuitemodule_init): Renamed 
+	  built-in module to '_capisuite'
+	* src/application/idlescript.cpp (run): Reduced delay until
+	  idlescript.py is called the first time after startup.
+	* src/capisuite-py: Added python library modules.
+	* src/capisuite-py/SConscript: Likewise.
+	* src/capisuite-py/__init__.py: Likewise.
+	* src/capisuite-py/config.py.in: Likewise.
+	* src/capisuite-py/consts.py: Likewise.
+	* src/capisuite-py/core.py: Likewise.
+	* src/capisuite-py/exceptions.py: Likewise.
+	* src/capisuite-py/fax.py: Likewise.
+	* src/capisuite-py/fileutils.py: Likewise.
+	* src/capisuite-py/pychecker.rc: Likewise.
+	* src/capisuite-py/voice.py: Likewise.
+	* scripts/fax.confin: Added sections 'Mail Fax|Voice ...'.
+	* scripts/answering_machine.confin: Likewise.
+	* rc.capisuite.in: Added 'todo' note.
+	* scripts/capisuite-checkconfig: new file (thx to
+	  carsten@capimin.cbclass.net for the idea and a first version).
+	* scripts/cs_helper.pyin: Changed to use new python library.
+	* scripts/capisuitefax.in: Reworked to use new python library.
+	* scripts/idle.py: Likewise.
+	* scripts/incoming.py: Likewise.
+	* scripts/remote-connect.py: Likewise.
+	* ChangeLog, TODO, AUTHORS: updated.
+
+2004-03-07  Gernot Hillier  <gernot@hillier.de>
+	* docs/manual.docbook: update links to new web site structure
+	* docs/manual-de.docbook: Likewise.
+	* docs/Makefile.am: tell DocBook HTML stylesheets to generate UTF-8
+	  and a valid DOCTYPE
+
+2004-02-25  Gernot Hillier  <gernot@hillier.de>
+	* docs/.cvsignore: add manpages/*
+	* docs/Makefile.am: add support for manpage creation, move validation
+	  etc. to separate target
+	* docs/manual.README: update, add information about manpages
+	* docs/manual.docbook: restructure to also create five man pages:
+	  (capisuite.8, capisuite.conf.5, fax.conf.5, answering_machine.conf.5,
+	  capisuitefax.1)
+	* docs/manual-de.docbook: Likewise.
+
+2004-02-20  Gernot Hillier  <gernot@hillier.de>
+	* src/application/capisuite.cpp: changed include order to get rid of
+	  the "_POSIX_C_SOURCE redefined" warning (thx to Hartmut Goebel)
+	* src/application/capisuitemodule.cpp: Likewise.
+	* src/application/idlescript.cpp: Likewise.
+	* src/application/incomingscript.cpp: Likewise.
+	* src/application/pythonscript.h: Likewise.
+	* scripts/answering_machine.confin: remove spaces in example which
+	  confused the config file parser when not deleted by the user
+	* scripts/fax.confin: Likewise.
+
+2004-02-20  Hartmut Goebel  <h.goebel@crazy-compilers.com>
+	* docs/Doxyfile.in: modified variable replacement for possible
+	  change of build system
+	* docs/Makefile.am: Likewise.
+
+2004-02-20  Gernot Hillier  <gernot@hillier.de>
+	* scripts/cs_helpers.pyin: fixed typo
+
+2004-02-17  Gernot Hillier  <gernot@hillier.de>
+	* docs/manual-de.docbook: fixed some syntax errors
+
+2004-02-17  Hartmut Goebel  <h.goebel@goebel-consult.de>
+	* docs/manual.docbook: fixed some syntax errors
+	* src/application/pythonscript.h: fixed #include statement
+	* src/backend/connection.cpp: Likewise.
+
+2004-02-11  Gernot Hillier  <gernot@hillier.de>
+	* scripts/incoming.py (faxIncoming,CVS log): fixed two typos /
+	  removed not allowed german umlauts
+	* src/modules/audioreceive.h (AudioReceive): correct exception
+	  declaration order (thx to Matthias Haberkorn for the patch)
+	* src/modules/callmodule.h (mainLoop): Likewise.
+
+2004-02-08  Gernot Hillier  <gernot@hillier.de>
+	* src/application/capisuitemodule.cpp (capisuite_audio_send, 
+	  capisuite_fax_send): catch some missing Exceptions
+	* src/backend/connection.{cpp,h} (connectWaiting,rejectWaiting): throw
+	  CapiExternalError instead of CapiError when user passed a wrong call
+	* src/backend/connection.{cpp,h} (connectWaiting,connect_b3_active_ind,
+	  disconnect_b3_ind,disconnect_ind,data_b3_ind,facility_ind_DTMF,
+	  info_ind_alerting,info_ind_called_party_nr,select_b_protocol_conf,
+	  alert_conf,data_b3_conf,facility_conf_DTMF,disconnect_b3_conf,
+	  disconnect_conf,send_block,start_file_transmission): add CapiError to
+	  allowed throwable objects in declaration
+	* src/modules/audiosend.{cpp,h} (mainLoop): Likewise.
+	* src/modules/callmodule.{cpp,h} (mainLoop): Likewise.
+	* src/modules/faxsend.{cpp,h} (mainLoop): Likewise.
+	* src/backend/connection.cpp (data_b3_conf): fix behaviour when 
+	  DATA_B3_CONF comes immediately after DATA_B3_REQ
+	* scripts/capisuitefax.in: also accept PDF files
+	* scripts/cs_helpers.pyin (sayNumber): allow gender specification
+	* scripts/incoming.py (remoteInquiry): use "eine" instead of "eins"
+	  in some places ("eine Nachricht")
+	* scripts/waves/Makefile.am: new file eine.la
+	* scripts/waves/eine.la: Likewise. 
+
+2004-01-18  Gernot Hillier  <gernot@hillier.de>
+	* scripts/cs_helpers.pyin (sendMIMEMail): remove space in sox call
+
+2004-01-17  Gernot Hillier  <gernot@hillier.de>
+	* scripts/cs_helpers.pyin (escape,getAudio,uniqueName,sendMIMEMail,
+	  sendSimpleMail,sayNumber), scripts/idle.py (idle,sendfax,movejob),
+	  scripts/incoming.py (callIncoming,faxIncoming,voiceIncoming,
+	  remoteInquiry,newAnnouncement): use % instead of + operator for
+	  string concatenation (faster; thx to Hartmut Goebel for the hint);
+	  use os.path.join where appropriate
+
+2004-01-11  Gernot Hillier  <gernot@hillier.de>
+	* docs/manual[-de].docbook: many small improvements, typos, etc.
+	* docs/manual[-de].docbook (require_hard): mention Linux 2.6 & mISDN,
+	* docs/manual[-de].docbook (install_install): don't let users ask CAPI
+	  driver related questions on the CapiSuite lists
+	* docs/manual[-de].docbook (install_bin): remove some of the special
+	  acknowledgemnts for Debian packages, also mention RedHat packages
+	* docs/manual[-de].docbook (configcs): document new DDI_* options
+	* docs/manual[-de].docbook (script_config): emphasize that users must
+	  exist in local system
+	* docs/manual[-de].docbook (playing_alaw, creating_alaw): use 16 bit wave 
+	  files
+	* docs/manual[-de].docbook (cff): update documentation of this format
+	* docs/manual[-de].docbook (incoming_tut_improving): document new 
+	  exception raising behaviour
+	* docs/manual[-de].docbook (incoming_tut_fax_recognition): mention
+	  return values which aren't used in the examples
+	* docs/manual[-de].docbook (idle_examples): add 0x349f as normal cause
+	* docs/manual[-de].docbook (default_incoming_1, default_incoming_2,
+	  default_incoming_3, default_incoming_4): update script documentation
+	  to reality ;-)
+	* docs/manual[-de].docbook (default_helpers): document escape()
+	* docs/manual[-de].docbook (acknowledgements): add link to NEWS and 
+	  ChangeLog as we won't include all contributors to the manual
+
+2004-01-10  Gernot Hillier  <gernot@hillier.de>
+	* .cvsignore: added stamp-files
+	* docs/manual-de.docbook (creating_alaw): small stylistic improvement
+	* src/capisuite.conf.in, src/application/capisuite.cpp (CapiSuite,
+	  readConfiguration): added new options DDI_base, DDI_length and
+	  DDI_stop_numbers
+	* src/application/capisuite.cpp (checkOption): nicer output format
+	* src/backend/capi.{cpp,h} (Capi,readMessage): new parameters for DDI,
+	  enable Called Party Info Element if DDI is used; accept Called
+	  Party Info Element; pass on DDI options to Connection object
+	* src/backend/connection.{cpp,h} (Connection,info_ind_called_party_nr):
+	  new parameters for DDI; interpret Called Party Info Element, get
+	  CalledPartyNumber from there instead of CONNECT_IND when DDI is used;
+	  docu improvements
+	* src/modules/connectmodule.h: disabled the automatic adding of CVS log
+	  messages

@@ -1,0 +1,3152 @@
+<?xml version="1.0"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+  "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"
+[
+<!ENTITY cs "<application>CapiSuite</application>">
+]>
+<book lang="de">
+<title>CapiSuite 0.5.git</title>
+<subtitle><ulink url="http://www.capisuite.de"/></subtitle>
+
+
+<bookinfo>
+	<author>
+		<firstname>Gernot</firstname><surname>Hillier</surname>
+		<affiliation><address><email>gernot@hillier.de</email></address></affiliation>
+	</author>
+	<othercredit>
+		<firstname>Ralf</firstname><surname>Schneider</surname>
+		<contrib>Deutsche Übersetzung</contrib>
+	</othercredit>
+</bookinfo>
+
+
+<preface id="intro"><title>Einleitung</title>
+
+	<sect1 id="welcome"><title>Willkommen bei &cs;</title>
+
+	<para>Willkommen bei &cs;, einer durch Python-Skripte erweiterbaren ISDN-Telekommunikations-Suite.</para>
+
+	<para>
+	Dieses Handbuch soll Ihnen helfen, &cs; so schnell wie möglich zu benutzen.
+	Weil ich das Lesen von Dokumentationen genau so hasse wie Sie, lassen Sie uns am besten gleich
+	anfangen.
+	</para>
+
+	<refentry id="capisuite">
+	<refmeta>
+		<refentrytitle>capisuite</refentrytitle>
+		<manvolnum>8</manvolnum>
+	</refmeta>
+	<refnamediv>
+		<refname>capisuite</refname>
+		<refpurpose>ISDN Telekommunikations-Suite</refpurpose>
+	</refnamediv>
+	<refsect1><title>Beschreibung</title>
+		<para>&cs; ist eine durch Python-Skripte erweiterbare ISDN-Telekommunikations-Suite.
+		Sie verwendet die neue CAPI-Schnittstelle für den Zugriff auf Ihre ISDN-Hardware - Sie
+		brauchen also eine Karte, für die ein CAPI-kompatibler Treiber verfügbar ist. Momentan sind
+		dies alle Karten, die von AVM hergestellt werden, und einige Eicon-Karten.
+		</para>
+
+		<para condition="man">Diese man-Page dient nur als kurze Einführung; für
+		die richtige Dokumentation lesen Sie bitte das im HTML- und PDF-Format beigelegte
+		Handbuch von &cs;.</para>
+
+		<para>&cs; versucht, es dem Anwender zu ermöglichen, seine eigenen ISDN-Applikationen zu
+        programmieren, ohne sich mit all den blöden Programmierdetails wie Callback-Funktionen, 
+        Datenpuffer, Protokolleinstellungen usw. herumschlagen zu müssen.</para>
+
+		<para>Ich nahm eine Skript-Sprache, die (meiner Meinung nach) sehr einfach zu verstehen,
+		zu benutzen und zu lernen ist - besonders für Anfänger: Python. Ich erweiterte sie um einige
+		Funktionen, die die ISDN-Basisfunktionalität für Benutzeranwendungen zur Verfügung stellen.
+		Hinter diesen Funktionen implementiert &cs; all die Details, die den Anwender gar nicht 
+        interessieren. Mein Ziel war es, die Skript-Programmierung so einfach wie möglich zu machen und
+        gleichzeitig Ihnen die Flexibilität zu geben, realisieren zu können, was Sie wollen.
+        </para>
+
+		<para>Um Ihnen einen kleinen Eindruck zu geben, wie einfach die Programmierung eines
+        Anrufbeantworters ist:
+
+		<informalexample>
+		<programlisting>def callIncoming (call, service, call_from, call_to):
+    connect_voice (call, 10)            # Ruf nach 10 Sek annehmen
+    audio_send (call, "announcemnt.la") # Ansage abspielen
+    audio_send (call, "beep.la")        # Piepton abspieln
+    audio_receive (call, "call.la", 10) # Anruf aufzeichnen</programlisting>
+		</informalexample>
+		</para>
+
+		<para>Natürlich fehlen hier einige Details wie z.B. das Erzeugen eines eindeutigen Dateinamens
+        oder das Speichern von zusätzlichen Informationen (angerufene und anrufende Teilnehmernummer,
+        Uhrzeit, ...) - aber ich nehme an, Sie verstehen das Prinzip.</para>
+
+		<para>Und - keine Angst - wenn Sie nur einen normalen Anrufbeantworter haben möchten oder ein paar
+		Faxe verschicken oder empfangen wollen, können Sie einfach die Standard-Skripte verwenden, die mit
+        &cs; ausgeliefert werden. Diese haben schon einige nette Funktionen - z.B. ist der Anrufbeantworter
+        multiuserfähig, unterstützt automatische Faxerkennung und Fernabfragefunktionen. Sie müssen
+		&cs; nur noch einige Details mitteilen wie Ihre eigene Nummer, eine eigene Ansage aufnehmen
+		und das war's.
+        </para>
+
+		<para>&cs; ist also schon für Ihre täglichen Telekommunikationsbedürfnisse ausgestattet - aber
+        wenn Sie die Dinge nicht so mögen wie ich - ändern Sie sie oder implementieren Sie sie komplett
+		selbst. Und wenn Sie schöne Skripte schreiben oder änderungen an meinen Standard-Skripten vornehmen,
+        wäre es nett, wenn ich sie bekommen und allen Anwendern zur Verfügung stellen könnte.
+        </para>
+	</refsect1>
+	<refsect1 condition="man"><title>Siehe Auch</title>
+		<para><simplelist type="inline">
+			<member><xref linkend="capisuite.conf"/></member>
+			<member><xref linkend="fax.conf"/></member>
+			<member><xref linkend="answering_machine.conf"/></member>
+			<member><xref linkend="capisuitefax"/></member>
+		</simplelist></para>
+	</refsect1>
+	</refentry>
+
+	</sect1>
+	<sect1 id="manual"><title>Aufbau des Handbuchs</title>
+		<para>Dieses Handbuch ist aufgeteilt in drei große Teile.</para>
+
+		<para>Der erste Teil (<xref linkend="gettingstarted"/>) erklärt, wie &cs; installiert wird, 
+        was Sie nach der Installation mit den Standard-Skripten machen können und wie Sie sie konfigurieren
+		können. Hier wird Ihnen keine Zeile Code präsentiert. Wenn Sie nur die Standard-Skripte nutzen
+        wollen, sollte dies alles sein, was Sie lesen müssen.</para>
+
+		<para>Der zweite Teil (<xref linkend="userguide"/>) erklärt Ihnen, wie Sie Ihre eigenen
+        Skripte schreiben können. Er gibt Ihnen eine sehr, sehr kurze Einführung in Python und eine
+        komplette Referenz der Befehle, die &cs; hinzufügt. Und schließlich enthält er einen überblick über 
+        die Standard-Skripte, wo deren Funktionsweise beschrieben ist, sodass Sie diese einfach als
+        Ausgangspunkt für Ihre eigenen Applikationen verwenden können.</para>
+
+		<para>Der letzte Teil wendet sich an Programmierer, die bei der Entwicklung des &cs;-Kerns helfen
+        möchten. Er gibt einen überblick über das System und eine detaillierte Beschreibung für jede 
+        einzelne Klasse, jede Methode und jedes Attribut. Da er automatisch aus den Sourcen von &cs; 
+        erstellt wird, ist er nicht Teil dieses Dokuments. Sie finden ihn entweder lokal unter
+		<ulink url="../reference/index.html"/> oder online unter
+		<ulink url="http://www.capisuite.de/reference/index.html"/>.</para>
+
+		<para>Es gibt dort auch noch einige zusätzliche Teile, in denen "was ich sonst noch sagen wollte"
+        enthalten ist:</para>
+
+		<para>Da &cs; als Diplomarbeit begonnen wurde, möchte ich in 
+        <xref linkend="acknowledgements"/> allen danken, die mir bisher geholfen haben.</para>
+
+		<para>Wenn Sie Ihre eigenen Skripte schreiben wollen oder wenn die bei der Entwicklung des
+        &cs;-Kerns mithelfen möchten, werden Sie bald über einige spezielle ISDN- und CAPI-Fehler-Codes
+		stolpern, die in <xref linkend="capicodes"/> erklärt sind.
+		</para>     
+
+		<para>Wenn Sie weitere Informationen oder Support benötigen, schauen Sie bitte auf die
+        &cs;-Homepage unter <ulink url="http://www.capisuite.de"/>. Sie finden dort Links to einem
+        Bug-Tracking-System, aktueller Dokumentation, Downloads und anderen Ressourcen. Wenn Sie Fragen
+        haben, Support benötigen oder uns Ihre Ideen oder Meinung bezüglich &cs; mitteilen möchten, sind
+        Sie auf den &cs;-Mailinglisten willkommen. Bitte schreiben Sie mir keine persönlichen Mail mit
+		solchen Fragen, da dies anderen Benutzern nicht hilft und ich kann nicht die gleiche Frage zehnmal
+		am Tag beantworten, sorry. Informationen, wie Sie sich auf den Listen anmelden können und wo das
+		Archiv zu finden ist, befinden sich ebenfalls auf der Homepage.</para>
+
+		<para>Ich hoffe, ich konnte Ihren Appetit wecken - lassen Sie uns nun also wirklich loslegen,
+        damit Sie bereit werden, &cs; zu benutzen.</para>
+	</sect1>
+</preface>
+
+<chapter id="gettingstarted"><title>Getting Started</title>
+	<sect1 id="install"><title>Voraussetzungen und Installation von &cs;</title>
+
+		<sect2 id="requirements"><title>Voraussetzungen</title>
+			<sect3 id="require_hard"><title>Hardware und Treiber</title>
+				<para>Da &cs; das CAPI (Common ISDN Application Programming Interface)
+				für den Zugriff auf Ihre ISDN-Hardware benutzt, brauchen Sie eine Karte, für die ein
+                CAPI-kompatibler Treiber verfügbar ist.</para>
+
+				<para>Momentan sind dies alle Karten, die von AVM hergestellt werden, und einige 
+                Eicon-Karten. Wenn Sie eine der passiven Karten von AVM nutzen, müssen Sie sich deren
+				CAPI-Treiber herunterladen und installieren.</para>
+
+				<para>Mit der neuen Linux-Version 2.6 und dem mISDN-Projekt, das in den neuen Kerneln
+				bereits enthalten ist, wird künftig für die meisten Karten, die heute vom HiSax-Treiber
+				unterstützt werden, auch ein CAPI-konformer Treiber zur Verfügung stehen. Leider wird
+				auch mISDN keine Faxprotokoll-Implementierung enthalten und deshalb wird das Faxen mit
+				&cs; (oder jedem anderen Linux-Programm) und passiven Karten weiterhin nicht möglich
+				sein; Fax-Unterstützung für passive Karten gibt es derzeit nur in den Binärtreibern von AVM.
+				</para>
+
+				<para>Es gibt keine Möglichkeit, &cs; mit der alten ISDN4Linux-Schnittstelle
+				und den passenden Treibern zum Laufen zu bringen. Vermutlich wird es die auch
+				wegen dem oben angesprochenen mISDN-Projekt nie geben, das wohl bald HiSax/ISDN4Linux
+				ablösen wird.</para>
+
+				<para>Es gibt auch einige Distributionen (z.B. aktuelle Versionen von SuSE), bei denen
+				die Capi4Linux-Treiber von AVM bereits dabei sind - Sie müssen sie dann nur noch
+				aktivieren (unter SUSE mit YaST2). Wenn Sie eine aktive Karte von AVM besitzen
+				(z.B. die B1, C2 oder C4), dann haben Sie bereits alles benötigte installiert.
+				SuSE bietet in neueren Versionen auch ein kleines grafisches Frontend zum Einrichten
+				von &cs; als Bestandteil von YaST an.</para>
+
+
+				<para>&cs; wurde hauptsächlich mit ISDN-Karten von AVM getestet, insbesondere mit der
+                Fritz!PCI, der Fritz!USB und der B1 auf der i386-Plattform, aber es sollte mit anderen
+				CAPI-kompatiblen Treibern für andere Karten oder auf anderen Plattformen keine Probleme
+                geben. Trotzdem müssen nicht von allen CAPI-kompatiblen Karten alle Features unterstützt
+                werden, sodass Sie evtl. nicht mit allen Karten faxen oder vom Sprach- in den Fax-Modus
+                umschalten können.</para>
+			</sect3>
+			<sect3 id="require_soft"><title>Software</title>
+				<para>&cs; benötigt einige Pakete, die installiert sein müssen, bevor &cs; benutzt werden
+                kann.</para>
+
+				<para>Ich liste sie hier zusammen mit einer kurzen Information, warum das Paket benötigt
+                wird und wo Sie weitere Informationen zur Installation finden können, auf. Es ist immer
+                eine gute Idee, zuerst einmal mit dem Installationstool Ihrer Lieblingsdistribution zu
+                prüfen, ob sie bereits dabei sind, bevor Sie alle aus dem Internet herunterladen und
+				installieren. Keine Angst, weil es so viele sind - die meisten sind bei fast jeder 
+                Distribution dabei und vermutlich bereits auf Ihrem System installiert.</para>
+
+				<variablelist>
+					<varlistentry>
+						<term>Python >= 2.2</term>
+						<listitem><para>&cs; verwendet einen eingebauten Python-Interpreter, um die 
+                            Skripte zu interpretieren - deshalb brauchen Sie eine installierte und lauffähige
+                            Version von Python. Diese sollte in nahezu jeder aktuellen Linux-Distribution
+							enthalten sein. Weitere Infos zu Python, ein schönes Tutorial und vieles mehr
+                            finden Sie unter <ulink url="http://www.python.org"/></para>
+						</listitem>
+					</varlistentry>
+					<varlistentry>
+						<term>sox >= 12.17.3</term>
+						<listitem><para>Dies ist das Schweizer Offiziersmesser für die Konvertierung
+							von Audio-Formaten. Es wird nicht vom &cs;-Kern benötigt, ist aber sehr nützlich,
+							wenn Sie Sprachdateien für Anrufe auf Ihrer Maschine anhören oder aufnehmen
+							möchten. Es wird auch benötigt, wenn Sie die Standard-Skripte von &cs; benutzen
+							möchten. Ich möchte wetten, dass es in Ihrer Distribution dabei ist und sehr
+							wahrscheinlich ist es auf Ihrem System bereits installiert. Um sicher zu gehen,
+							probieren Sie einfach mal aus, <command>sox</command> zu starten. Wie mir Helmut
+							Gruber mitteilte, benötigen Sie mindestens Version 12.17.3, da erst diese die hier
+							genutzten Inversed-A-Law-Dateien unterstützt. Sie
+							finden weitere Details unter <ulink url="http://sox.sourceforge.net"/>
+						</para></listitem>
+					</varlistentry>
+					<varlistentry>
+						<term>sfftobmp</term>
+						<listitem><para>&cs; speichert Fax-Dateien im CAPI-spezifischen Format 
+                            Structured Fax File (SFF). sfftobmp ist ein kleiner, aber sehr nützlicher 
+                            Konverter, um diese Dateien in gängigere Formate wie JPEG, TIFF oder BMP zu
+                            konvertieren. Sie bekommen es unter
+                            <ulink url="http://sfftools.sourceforge.net/sfftobmp.html"/>.
+							Es wird ebenfalls nicht vom &cs;-Kern benötigt, aber von den Standard-Skripten.
+                            </para>
+						</listitem>
+					</varlistentry>
+					<varlistentry>
+						<term>sffview</term>
+						<listitem><para>Dieses Tool ist ein einfacher, aber nützlicher SFF-Betrachter. 
+                        Es wird von keiner &cs;-Komponente benötigt, ist aber sehr nützlich, wenn Sie mal
+						eben ein Fax ansehen möchten, ohne es vorher erst konvertieren zu müssen. Sie finden
+                        es unter <ulink url="http://sfftools.sourceforge.net/sffview.html"/>.</para>
+						</listitem>
+					</varlistentry>
+					<varlistentry>
+						<term>tiff2pdf</term>
+						<listitem><para>Ein kleines Utility, um TIFF-Dateien verlustfrei ins PDF-Format zu
+                            konvertieren. Es wird von den Standard-Skripten benötigt, um Faxe in PDF-Dateien
+							umzuwandeln (SFF->TIFF->PDF :-} ). Es ist oft in einem Paket namens 
+                            <literal>tiff</literal> oder <literal>tifftools</literal> enthalten. 
+                            Details unter <ulink url="http://www.libtiff.org"/>
+						</para></listitem>
+					</varlistentry>
+					<varlistentry>
+						<term>aktueller Ghostscript mit cfax-Patch</term>
+						<listitem><para>Aktuelle Ghostscript-Versionen enthalten ein Device, um die 
+							oben erwähnten SFF-Dateien zu erstellen. Wenn Sie eine ältere Version haben,
+							brauchen Sie den Patch von
+							<ulink url="http://sfftools.sourceforge.net/ghostscript.html"/>. Um zu
+							prüfen, ob Ihre GhostScript-Version diesen Patch bereits hat, rufen Sie bitte
+							<command>gs --help</command> auf und sehen nach, ob Sie das Device
+							<literal>cfax</literal> in der langen Liste der unterstützten Devices
+							finden können.</para>
+						</listitem>
+					</varlistentry>
+					<varlistentry>
+						<term>jpeg2ps</term>
+						<listitem><para>Das <command>jpeg2ps</command>-Kommando wird zur Konvertierung von Farbfaxen in
+						das PostScript-Format für die Mailzustellung benötigt. Sie brauchen es nicht, wenn Sie keine
+						Farbfaxe empfangen wollen. Unglücklicherweise gibt es wegen eines Treiberfehlers momentan keine
+						Möglichkeit, den Empfang von Faxdokumenten bei AVM-ISDN-Karten komplett zu deaktivieren. Wenn Ihnen
+						also jemand ein Farbfax schicken sollte (was nach meiner Erfahrung nur sehr selten vorkommt), dann
+						bekommen Sie eine Fehlermeldung per Mail, wenn Sie dieses Programm nicht installiert haben.
+						Wenn Ihre Linux-Distribution dieses Paket nicht enthält, können Sie es von
+						<ulink url="http://www.pdflib.com/products/more/jpeg2ps.html"/> herunterladen.</para>
+						<para>Da das Farbfaxprotokoll für die Übertragung mehrseitiger Dokumente aneinandergehängte JPEG-Dateien
+						benutzt, sollten Sie außerdem meinen multiJPEG-Patch von
+						<ulink url="http://www.hillier.de/linux/jpeg2ps-multi.php3"/> herunterladen und anwenden.</para>
+						</listitem>
+					</varlistentry>
+                                        <varlistentry>
+                                                <term>glibc Locales</term>
+                                                <listitem><para>Wenn Sie eine AVM-ISDN-Karte für den Versand oder Empfang von Faxen benutzen
+							wollen, so benötigen Sie die sogenannten "glibc locales", damit &cs; Ihre Faxkopf-
+							zeile in das historische CP437-Encoding übersetzen kann, das AVM-Treiber erwarten. Diese
+							Locales sind Teil der Basis-C-Bibliothek glibc, die Teil jedes heutigen Linux-Systems ist.
+							Manche Distributoren verpacken jedoch die Locales in separate Installationspakete, die Sie
+							evtl. nachinstallieren müssen. SuSE benutzt dafür beispielsweise das Paket "glibc-locale".
+							Um zu sehen, ob die Locales auf Ihrem System verfügbar sind, suchen Sie nach einer Datei
+							namens "IBM437.so" in den Bibliothekspfaden auf Ihrem System (bei SuSE liegt sie
+							beispielsweise unter /usr/lib/gconv). Sollten Sie die Datei dort nicht finden, suchen Sie
+							im Paketmanager Ihrer Distribution nach einem glibc-Subpaket, das Locales enthält.</para>
+                                                </listitem>
+                                        </varlistentry>
+				</variablelist>
+			</sect3>
+		</sect2>
+		<sect2 id="install_install"><title>Installation</title>
+			<para>Zuerst sollten Sie prüfen, ob Ihr CAPI-Treiber korrekt eingerichtet wurde.
+			Rufen Sie einfach <command>capiinfo</command> als root in einer Shell auf.</para>
+
+			<para>Wenn Sie viele Zeilen erhalten, funktioniert Ihr CAPI-Treiber. Wenn Sie nur eine
+			Fehlermeldung erhalten, müssen Sie einen CAPI-kompatiblen Treiber installieren. Bitte schauen
+            Sie in der Dokumentation Ihres ISDN-Kartenherstellers, Ihrer Linux-Distribution und/oder
+			auf einer ISDN-Mailingliste deswegen nach.</para>
+
+			<para>Der Rest der Installation hängt davon ab, ob Sie Binär- oder Source-Pakete verwenden, um
+			&cs; zu installieren. Wenn die die &cs;-Sourcen nicht ändern möchten, empfehle ich, die 
+            Binärpakete zu verwenden, falls diese für Ihre Distribution und Plattform verfügbar sind.
+            </para>
+
+			<para>Sie können sowohl die Binär- als auch die Source-Pakete im Download-Bereich unter
+			<ulink url="http://www.capisuite.de"/> herunterladen. Wenn Sie selbst Pakete für
+            andere Distributionen erstellt haben, schicken Sie mir diese bitte und ich werde sie dorthin
+            kopieren...</para>
+
+			<sect3 id="install_bin"><title>Installation der Binär-Pakete</title>
+
+				<para>Wenn Sie Binär-Pakete für Ihre Distribution und Plattform bekommen können, empfehle
+				ich, diese zu verwenden. Diverse Pakete für diverse Distributionen sind bereits verfügbar,
+				die von verschiedenen Personen gepflegt werden. CapiSuite ist mittlerweile auch 
+				Bestandteil von aktuellen Versionen von SUSE, Debian und Gentoo.</para>
+
+				<para>Wenn es Ihnen gelungen ist, &cs; auf einem nicht erwähnten System zu installieren,
+				lassen Sie es mich bitte wissen und ich werde die Beschreibung hier aufnehmen. Wenn Sie
+				Binär-Pakete für andere Distributionen erstellt haben, wäre ich ebenfalls erfreut, wenn ich 
+				auf Ihren Download-Bereich verweisen könnte oder Sie auf meiner Seite anbieten könnte.
+                </para>
+
+				<para>Jetzt sollte alles soweit sein, dass wir loslegen können. Lesen Sie also weiter im
+				<xref linkend="csglobal"/>.</para>
+
+				<sect4 id="install_bin_rpm"><title>Installation der RPM-Pakete (SUSE, Mandrake, Fedora &amp; Co.)</title>
+					<para>Um die &cs;-RPM-Pakete zu installieren, können Sie entweder Ihr
+                    Lieblings-Setup-Tool verwenden - entweder von Ihrem Distributor oder aus der Community -
+                    oder Sie können es manuell (als root) machen:</para>
+
+					<screen>rpm -Uvh capisuite-version.rpm</screen>
+				</sect4>
+
+				<sect4 id="install_bin_other"><title>Installation anderer Pakete</title>
+					<para>Informationen über die Installation anderer Paketformate
+					sollten Sie in der Dokumentation Ihrer Distribution, in den Paketen
+					selbst oder auf den Homepages der jeweiligen Maintainer finden. 
+					Wenn Sie eine Installationsbeschreibung für bestimmte Pakete 
+					für diese Anleitung verfassen wollen, wenden Sie sich bitte an mich.</para>
+				</sect4>
+			</sect3>
+
+			<sect3 id="install_source"><title>Installation der Source-Pakete</title>
+				<para>Wenn Sie keine Binär-Pakete verwenden können oder Sie möchten alles selbst machen,
+				können Sie sich die Sourcen aus dem Download-Bereich herunterladen.</para>
+
+				<para>Laden Sie das neueste Tar-Archiv (capisuite-X.Y.tar.gz) von der &cs;-Homepage
+                herunter und kopieren Sie es irgendwo hin. Wechseln Sie dorthin und geben Sie die
+                folgenden Befehle ein:</para>
+
+				<screen
+>./configure
+make
+su # jetzt als root
+make install</screen>
+
+				<para>Dies installiert &cs; komplett im <filename>/usr/local</filename>-Baum. Wenn
+				Sie in ein anderes Verzeichnis installieren möchten, schauen Sie sich bitte die
+				Kommandozeilen-Hilfe an, die von
+
+				<screen
+>./configure --help</screen>
+
+				ausgegeben wird. Hier finden Sie Optionen zum ändern des Installationsverzeichnisses.</para>
+			</sect3>
+			<sect3 id="install_GIT"><title>Installation aus dem Subversion-Repository</title>
+				<para>Wenn Sie ganz innovativ sein und immer die neuesten Features testen wollen,
+				können Sie sich die aktuellen Sorucen von &cs;von github holen:</para>
+
+	            <para><screen>git clone https://github.com/larsimmisch/capisuite.git</screen></para>
+
+				<para><emphasis>Dies wird nicht empfohlen, wenn Sie nicht die neuesten Features testen
+				oder bei der Entwicklung von &cs; helfen wollen! Die Entwicklungsversionen können OK sein,
+				können aber auch nicht funktionieren, Ihren Rechner in die Luft jagen oder noch nicht
+				mal kompilieren. Es ist Ihr eigenes Risiko!</emphasis></para>
+
+				<para>Sie müssen die üblichen Entwicklungs-Tools installiert und lauffähig haben, wie z.B.
+				GNU make, gcc/g++ und alle Komponenten, die oben beschrieben wurden (insbesondere die 
+				Entwickler-Pakete von Python).</para>
+
+				<para>Wenn Sie die Dokumentation aus den Sourcen erstellen wollen, brauchen Sie zusätzlich
+				Doxygen und funktionsfähige Docbook/XML-Tools.</para>
+
+				<para>Eine Anleitung, wo Sie das Repository finden und wie Sie die Sourcen auschecken
+				können, finden Sie im Download-Bereich auf der &cs;-Homepage unter
+				<ulink url="http://www.capisuite.de"/>.</para>
+
+				<para>Jetzt können Sie ganz normal mit der Installation weiter machen wie im
+				<xref linkend="install_source"/> beschrieben.</para>
+			</sect3>
+			
+		</sect2>
+		<sect2 id="install_update"><title>Update von früheren Versionen</title>
+			<para>Dieser Abschnitt enthält einen Überblick über das Vorgehen,
+			wenn Sie bereits eine frühere Version von CapiSuite installiert 
+			haben.</para>
+			
+			<para>Generell sollte der übliche Updatemechanismus, passend zu Ihrer
+			Installationsart verwendet werden - zum Beispiel also der Update-Modus
+			Ihres Paketmanagementtools wenn Sie ein Binärpaket installiert haben.
+			Sollten Sie CapiSuite von den Sourcen gebaut haben, sollten Sie ihre 
+			alte Konfiguration vor dem Aufruf von <command>make install</command>
+			sichern. Im Prinzip entspricht das Vorgehen hier dem bei jedem anderen
+			Software-Paket, das Sie benutzen - daher möchten wir hier nicht weiter
+			darauf eingehen.</para>
+			
+			<para>Was hier hauptsächlich behandelt werden soll, sind die Änderungen
+			der Konfigurationsdateien und der Anforderungen an andere installierte Tools
+			zwischen verschiedenen CapiSuite-Versionen, so dass Sie Ihre Installation
+			schnell auf den aktuellen Stand bringen könnnen. Eine umfassendere 
+			Liste der neuen Features und wichtigen Änderungen finden Sie in der Datei
+			<filename>NEWS</filename>, die in den CapiSuite-Paketen enthalten ist.
+			Zusätzlich enthält das <filename>ChangeLog</filename> alle einzelnen 
+			Änderungen in den Source-Dateien im Detail, was aber wohl nur für
+			Entwickler interessant sein dürfte.</para>
+			
+			<sect3 id="install_update_0_4_5"><title>0.4.4 auf 0.4.5</title>
+				<para>Die <emphasis>Standardskripte</emphasis> verwenden
+				nun eine SMTP-Verbindung zu localhost, anstatt das 
+				<command>sendmail</command>-Kommando manuell aufzurufen, wie
+				es frühere Versionen taten. Dies wurde auf Grund von diversen
+				Stabilitätsproblemen mit dem alten Mechanismus geändert.
+				Das bedeutet, dass Sie nun einen laufenden SMTP-Dämon benötigen,
+				der Verbindungen auf localhost annimmt. Da dies in der 
+				Standardeinrichtung der meisten Distributionen der Fall ist, 
+				sollte das kein Problem sein.</para>
+				
+				<para>In <filename>answering_machine.conf</filename> und 
+				<filename>fax.conf</filename> stehen zwei neue Optionen zur
+				Verfügung: <option>fax_email_from</option> und 
+				<option>voice_email_from</option> erlauben die Festlegung
+				der von CapiSuite beim Senden von Mails an die User verwendeten 
+				Absenderadresse. Diese Einträge sind allerdings optional - 
+				sind sie nicht gesetzt, wird wie bisher der Username als
+				Absender angegeben.</para>
+			</sect3>
+		</sect2>
+	</sect1>
+	<sect1 id="csglobal"><title>Wie funktioniert &cs;, wie wird es konfiguriert und gestarted</title>
+		<para>Lassen Sie uns zuerst anfangen mit einer kurzen Einführung, was &cs; wirklich ist und wie
+		es funktioniert. Danach wird die Konfiguration und das Starten von &cs; kurz erklärt.</para>
+
+		<sect2 id="howwork"><title>Wie funktioniert &cs;?</title>
+			<para>&cs; ist ein Daemon (Programm, das im Hintergrund läuft), dessen Hauptaufgabe es ist,
+			darauf zu warten, dass ein Anruf ankommt. Wenn das passiert, startet er ein spezielles 
+            Python-Skript - das <emphasis>Incoming-Skript</emphasis> - und macht, was dieses Skript
+            ihm sagt, z.B. einen Sprachanruf aufzeichnen, um einen Anrufbeantworter zu implementieren.
+			</para>
+
+			<para>Für ausgehende Rufe gibt es ein weiteres Skript, das regelmäßig aufgerufen wird
+			- das <emphasis>Idle-Skript</emphasis>. Es kann alle Resourcen prüfen, um Anweisungen
+			zum Durchführen eines Anrufs zu erhalten - es ist z.B. vorstellbar, einen speziellen
+			Mail-Account zu prüfen oder spezielle Verzeichnisse zu beobachten, in die der Anwender bestimmte
+			Aufträge ablegen kann.</para>
+
+			<para>Es werden also alle für den Benutzer sichtbaren Aktionen und das Verhalten von &cs; über
+            diese beiden Skripte definiert.</para>
+
+			<para>Sie müssen nun zwei Dinge tun:</para>
+
+			<itemizedlist>
+				<listitem><para>die Skripte zur Verfügung stellen, indem Sie entweder</para>
+					<itemizedlist>
+						<listitem><para>die Standard-Skripte, die mit &cs; geliefert werden, benutzen 
+                        und anpassen oder</para></listitem>
+						<listitem><para>Ihre eigenen Skripte schreiben (vielleicht, indem Sie die
+                        Standard-Skripte als Vorlage verwenden)</para></listitem>
+					</itemizedlist>
+				</listitem>
+				<listitem><para>&cs; selbst konfigurieren und ihm sagen, wo die beiden Skripte zu 
+                finden sind</para></listitem>
+			</itemizedlist>
+
+			<para>Diese Seite konzentriert sich auf die allgemeine Konfiguration von &cs; - diese besteht
+            hauptsächlich aus Optionen, die festlegen, welche Skripte verwendet werden und wo und wie die
+			Aktivitäten protokolliert werden. Danach werden einige Details zum Starten von &cs; beschrieben.
+            </para>
+
+			<para>Die nächste Seite gibt dann eine Einführung zu den Standard-Skripten, die Sie bereits
+            zusammen mit &cs; installiert haben und zeigt Ihnen, wie der Anrufbeantworter und die
+            Fax-Funktionen genutzt werden können.</para>
+
+			<para>Die Details, wie Sie eigene Skripte schreiben können, werden in einem anderen Teil der
+            Dokumentation (<xref linkend="userguide"/>) behandelt.</para>
+		</sect2>
+		<sect2 id="configcs"><title>Konfiguration von &cs;</title>
+			<para>&cs; verwendet eine allgemeine Konfigurationsdatei für die Kernfunktionen. Diese Datei
+			sollte unter <filename>/etc/capisuite/capisuite.conf</filename> oder
+            <filename>/usr/local/etc/capisuite/capisuite.conf</filename> liegen (hängt davon ab, wie
+			Sie &cs; installiert haben).  Sie wird in <xref linkend="capisuite.conf"/>
+			detailliert beschrieben. Die meisten Optionen sind bereits mit brauchbaren
+			Voreinstellungen belegt	- wenn Sie wollen, können Sie diesen Abschnitt also
+			überspringen.</para>
+
+			<refentry id="capisuite.conf">
+			<refmeta>
+				<refentrytitle>capisuite.conf</refentrytitle>
+				<manvolnum>5</manvolnum>
+			</refmeta>
+			<refnamediv>
+				<refname>capisuite.conf</refname>
+				<refpurpose>Konfiguration des &cs;-Daemon</refpurpose>
+			</refnamediv>
+			<refsect1><title>Beschreibung</title>
+
+			<para>Die Optionen für den &cs;-Daemon werden hier festgelegt. Sie sind hier
+			nur kurz vorgestellt - für weitere Details schauen Sie sich bitte
+			die Kommentare in der Konfigurationsdatei selbst an.</para>
+
+			</refsect1>
+			<refsect1><title>Optionen</title>
+			<variablelist>
+				<varlistentry>
+					<term><option>incoming_script="/path/to/incoming.py"</option></term>
+					<listitem><para>Diese Option sagt &cs;, welches Skript bei eingehenden Anrufen
+						ausgeführt werden soll. ändern Sie dies nur, wenn Sie Ihr eigenes Skript verwenden
+                        möchten.</para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term><option>idle_script="/path/to/idle.py"</option></term>
+					<listitem><para>Diese Option gibt den Pfad und den Namen des Idle-Skripts wider.
+						Dieses Skript wird in regelmäßgien Intervallen aufgerufen, um zu prüfen, ob ein
+						ausgehender Ruf getätigt werden soll. Wie oben sollten auch hier die Voreinstellungen
+						OK sein, wenn Sie nicht Ihr eigenes Skript verwenden wollen.</para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term><option>idle_script_interval="30"</option></term>
+					<listitem><para>Hier können Sie festlegen, wie oft das Idle-Skript ausgeführt werden
+                        soll. Die angegebene Zahl ist das Intervall zwischen zwei Aufrufen in Sekunden.
+						Kleinere Zahlen resultieren in einer schnelleren Reaktion auf abgesetzte Jobs, aber
+						auch in einer höheren Systemlast. Die Voreinstellung sollte in den meisten Fällen
+                        OK sein.</para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term><option>log_file="/path/to/capisuite.log"</option></term>
+					<listitem><para>Diese Datei wird verwendet für alle "normalen" Meldungen, die von
+						&cs; ausgegeben werden und die Ihnen mitteilen, was &cs; gerade macht.
+                        Fehlermeldungen werden in ein spezielles Log geschrieben (siehe unten).
+                        </para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term><option>log_level="1"</option></term>
+					<listitem><para>Sie können festlegen, wie detailliert die Protokollierung von &cs; 
+                        sein soll. Die Voreinstellung gibt ein paar informative Meldungen für jeden
+						eingehenden und ausgehenden Ruf und sollte im Normalfall ausreichen. Ich empfehle,
+						den Werte nur zu erhöhen, wenn Probleme auftreten. Logs mit höherem Level sind
+                        hauptsächlich für Entwickler gedacht. Sie sollten Sie also nur verwenden, wenn Sie
+						ein Problem melden wollen oder sich ein bisschen mit der CAPI-Schnittstelle und den
+						Internas von &cs; auskennen.</para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term><option>log_error="/path/to/capisuite.error"</option></term>
+					<listitem><para>Alle Fehler, die &cs; intern und in Ihren Skripten feststellt,
+						landen hier. Sie werden in eine extra Datei geschrieben, sodass sie nicht im normalen
+						Log untergehen. Bitte schauen Sie sich dieses Log regelmäßig an - insbesondere, wenn
+                        Probleme auftreten. Bitte schicken Sie alle Meldungen, die Sie nicht verstehen und
+						die nicht durch Ihre eigenen änderungen an den Skripten verursacht wurden, an das
+						&cs;-Team.</para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term><option>DDI_length="0"</option></term>
+					<listitem><para>Wenn Ihre ISDN-Karten mit einem Anlagenanschluss verbunden ist,
+						benutzen Sie normalerweise auch DDI. DDI heißt, Sie haben nur eine
+						Hauptrufnummer und können Ihre Durchwahlen nach Belieben selbst festlegen.
+						In diesem Fall müssen Sie die Länge Ihrer Durchwahlen hier festlegen.
+						Wenn Sie zum Beispiel 1234-000 bis 1234-999 benutzen, dann ist Ihre DDI_length 3.
+						Wenn hier 0 gesetzt ist, dann ist DDI deaktiviert.</para>
+
+						<para>Sollten Sie jetzt nur Bahnhof verstanden haben, dann haben Sie vermutlich
+						kein DDI und können die Einstellung so belassen, wie sie ist.</para></listitem>
+				</varlistentry>
+
+				<varlistentry>
+					<term><option>DDI_base_length="0"</option></term>
+					<listitem><para>Diese Option wird nur benutzt, wenn DDI_length nicht 0 ist.
+					Hier wird die Länge der Basisrufnummer festgelegt - im obigen Beispiel wäre das
+					4.</para></listitem>
+				</varlistentry>
+
+				<varlistentry>
+					<term><option>DDI_stop_numbers=""</option></term>
+					<listitem><para>Wenn Sie ülicherweise Durchwahlen einer bestimmten Länge verwenden,
+					aber auch einige kürzere Ausnahmen haben (beispielsweise die "-0" für die Zentrale),
+					dann können Sie diese Ausnahmen hier durch Kommata getrennt auflisten.</para></listitem>
+				</varlistentry>
+			</variablelist>
+			</refsect1>
+			<refsect1 condition="man"><title>Siehe Auch</title>
+				<para><simplelist type="inline">
+					<member><xref linkend="capisuite"/></member>
+					<member><xref linkend="fax.conf"/></member>
+					<member><xref linkend="answering_machine.conf"/></member>
+					<member><xref linkend="capisuitefax"/></member>
+				</simplelist></para>
+			</refsect1>
+			</refentry>
+		</sect2>
+		<sect2 id="startcs"><title>Start von &cs;</title>
+			<para>Da &cs; ein Daemon ist, wird es normalerweise beim Systemstart aktiviert. Sie müssen
+			lediglich den Aufruf von
+
+			<screen><command>/path/to/capisuite -d</command></screen>
+
+			in Ihre Start-Skripte einfügen. In LSB-konformen Linux-Distributionen finden Sie die
+            Start-Skripte unter <filename>/etc/init.d</filename>. Für eine detaillierte Beschreibung,
+			wie dort ein Service hinzu gefügt wird, schauen Sie bitte in der Dokumentation Ihrer Distribution
+			nach. Ein Beispiel eines Start-Skripts für SUSE-Linux ist in der Source-Distribution enthalten 
+            (see <filename>rc.capisuite</filename>). Dieses sollte (hoffentlich) auch mit anderen
+			LSB-komformen Distributionen funktionieren. Wenn Sie es anpassen müssen, würde ich mich über Ihr
+			Feedback freuen und würde hier gerne Anleitungen für andere Distributionen aufnehmen.</para>
+
+			<para>Wenn Sie die richtigen RPM-Pakete von &cs; verwenden, sollten die benötigten Skripte
+			bereits enthalten sein. Bitte verwenden Sie das Konfigurations-Tool Ihres Distributors, um sie
+			zu aktivieren. Wenn Sie das RPM verwenden, das mit SUSE-Linux geliefert wird, und Sie bei den
+			Standard-Skripten bleiben wollen, sollte alles "out of the box" funktionieren.
+			Sobald Sie die Standard-Skripte konfiguriert haben, rufen Sie einfach
+			<command>rccapisuite restart</command> auf.</para>
+
+			<para>Zu Debug-Zwecken können Sie &cs; auch jederzeit manuell starten, indem Sie
+
+			<screen><command>/path/to/capisuite</command></screen> aufrufen</para>
+
+			<para>Es gibt auch noch ein paar weitere Kommandozeilen-Optionen:</para>
+
+			<variablelist>
+				<title>Kommandozeilen-Optionen von &cs;</title>
+				<varlistentry>
+					<term><option>--help, -h</option></term>
+					<listitem><para>Zeigt eine kurze Zusammenfassung der Kommandozeilen-Optionen an
+                        </para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term><option>--config=file, -c file</option></term>
+					<listitem><para>Verwendet eine benutzerdefinierte Konfigurationsdatei anstelle von
+						<filename>/etc/capisuite/capisuite.conf</filename> oder
+						<filename>/usr/local/etc/capisuite/capisuite.conf</filename>.
+                        </para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term><option>--daemon, -d</option></term>
+					<listitem><para>Läuft als Daemon (verwendet im Start-Skript, siehe oben)
+                        </para></listitem>
+				</varlistentry>
+			</variablelist>
+
+			<para>&cs; kann theoretisch von jedem Benutzer aufgerufen werden. Es braucht lediglich 
+            read/write-Zugriffsrechte auf <filename>/dev/capi20</filename>. Wenn Sie jedoch die
+            Standard-Skripte verwenden, <emphasis>muss</emphasis> &cs; als 
+            <literal>root</literal> ausgeführt werden.</para>
+		</sect2>
+	</sect1>
+	<sect1 id="scripts"><title>Features und Konfiguration der Standard-Skripte</title>
+		<para>Wie bereits oben erwähnt, werden mit &cs; Standard-Skripte geliefert, die Ihnen die am
+		weitesten verbreiteten Kommunikationsfunktionen (Anrufbeantworter und Fax) zur Verfügung stellen.
+        </para>
+
+		<para>Dieser Abschnitt soll Ihnen helfen, diese für Ihre täglichen Bedürfnisse zu nutzen.</para>
+
+		<sect2 id="script_features"><title>Skript-Features</title>
+			<para>Die mit &cs; gelieferten Skripte stellen folgende Hauptfunktionen zur Verfügung:</para>
+
+			<itemizedlist>
+				<listitem>
+					<para>Multi-User-Anrufbeantworter</para>
+					<itemizedlist>
+						<listitem><para>verschiedene Benutzer können verschiedene Nummern haben und 
+                            unterschiedliche Ansagetexte</para></listitem>
+						<listitem><para>eingehende Anrufe werden gespeichert und per E-Mail an den 
+                            Benutzer verschickt</para></listitem>
+						<listitem><para>die Verzögerung, bis ein Anruf angenommen wird, und die 
+                            maximale Aufnahmelänge ist konfigurierbar</para></listitem>
+						<listitem><para>Stille wird erkannt und der Anruf nach einer einstellbaren 
+                            Zeit beendet</para></listitem>
+						<listitem><para>eingehende Fax-Anrufe werden automatisch erkannt und empfangen
+                            </para></listitem>
+						<listitem><para>komfortable, menügesteuerte Fernabfragefunktionen, die Ihnen
+							Datum/Uhrzeit des Anrufs sowie die angerufene und die anrufende Nummer 
+                            mitteilen, stehen zu Verfügung</para></listitem>
+						<listitem><para>über das Fernabfragemenü können Sie Ihren eigenen Ansagetext
+                            aufnehmen</para></listitem>
+						<listitem><para>fast alle Einstellungen sind global konfigurierbar, können 
+                            aber für jeden Benutzer überschrieben werden</para></listitem>
+					</itemizedlist>
+				</listitem>
+				<listitem>
+					<para>Fax-Gerät</para>
+					<itemizedlist>
+						<listitem><para>verschiedene Benutzer können verschiedene Nummern haben
+                            </para></listitem>
+						<listitem><para>eingehende Faxe werden gespeichert und per E-Mail an den 
+                            Benutzer verschickt</para></listitem>
+						<listitem><para>Kommandozeilen-Tools zum faxen von PostScript-Dokumenten sind 
+                            vorhanden</para></listitem>
+						<listitem><para>Anzahl von Versuchen und die Verzögerung beim Senden von Faxen
+                            ist konfigurierbar</para></listitem>
+						<listitem><para>momentan wird nur ein ISDN-Controller für ausgehende Faxe 
+                            unterstützt</para></listitem>
+					</itemizedlist>
+				</listitem>
+			</itemizedlist>
+
+			<para>Da meine Muttersprache deutsch ist, sind alle mitgelieferten WAV-Dateien nur in deutsch
+            verfügbar. Wenn jemand englische WAV-Dateien (oder in irgendeiner anderen Sprache) zur Verfügung
+			stellen möchte, nehmen Sie mit mir Kontakt auf. Danke!</para>
+		</sect2>
+
+		<sect2 id="howscriptswork"><title>Wie die Skripte funktionieren</title>
+			<para>Es folgt nun ein grober überblick, wie die Skripte funktionieren. Ich werde hier nur das
+			Verhalten beschreiben, das für den Benutzer interessant ist. Wenn Sie die Interna verstehen
+            möchten, schauen Sie sich bitte den <xref linkend="default_script_overview"/> an.</para>
+
+			<para>Wenn ein eingehnder Anruf empfangen wird, wird die anrufende Nummer in verschiedenen 
+            Listen für die verschiedenen Benutzer gesucht. Jeder Benutzer kann in der Konfiguarition eigene
+            Nummern definieren (siehe untern). Die Skripte entscheiden also anhand der angerufenen Nummer,
+            an welchen Benutzer der Anruf gerichtet ist. Wenn Sie die Nummer in der Sprach- oder
+            Fax-Nummernliste eines Benutzers finden, beantworten Sie den Anruf mit diesem Service und geben
+			dem Anrufer die Möglichkeit, seine Nachricht zu hinterlassen oder sein Fax zu senden.</para>
+
+			<para>Das empfangene Dokument wird dann in einem lokalen Verzeichnis in einem eigenen Format
+			und auch konvertiert in ein gängiges Format gespeichert und zusammen  mit einigen Details des
+            Anrufs an den Benutzer gemailt. Sprachanrufe werden als WAV-Anhang geschickt, während Faxe
+			als PDF-Dokumente an die Mail angehängte werden.</para>
+
+			<para>Sie bekommen also normalerweise Ihre eingehenden Anrufe als Mail an die angegeben
+            Adresse geschickt - sie werden zur Sicherheit aber auch noch im lokalen Dateisystem gespeichert.
+			Es ist Ihre Aufgabe, alte Dateien, die nicht mehr benötigt werden, zu löschen. Weitere
+            Informationen finden Sie im <xref linkend="deleteoldfiles"/>.</para>
+
+			<para>Für den Anrufbeantworter besteht die Möglichkeit zur Fernabfrage. Der Anrufer bekommt ein
+			Menü, wo er wählen kann, ob er seine Ansage aufnehmen oder gespeicherte Anrufe abhören möchte.
+			Er bekommt gesagt, wieviele Anrufe vorhanden sind, von wem und wann sie empfangen wurden usw.
+            Darüber hinaus kann er aufgenommene Anrufe, die er nicht mehr benötigt, löschen.</para>
+
+			<para>Ein anderes Skript prüft regelmäßig ein spezielles Queue-Verzeichnis nach ausgehenden
+            Fax-Aufträgen. Mit Hilfe des Kommandozeilen-Tools <command>capisuitefax</command> werden Aufträge in
+	    diesem Verzeichnis abgelegt. Weitere Details dazu finden ich in <xref linkend="usingscripts"/>.</para>
+		</sect2>
+
+		<sect2 id="script_config"><title>Skript-Konfiguration</title>
+			<para>Es gibt einige wichtige Optionen, die die Skripte wissen müssen, bevor Sie sie benutzen
+            können - Dinge, wie die Nummern des Benutzers und einige Details, wie Anrufe zu behandeln sind.
+            </para>
+
+			<para>Diese Optionen werden aus zwei Konfigurationsdateien gelesen. Sie werden
+			weiter unter kurz beschrieben. Alle Details
+            hierzu finden Sie in den Kommentaren in den Beispiel-Konfigurationsdateien, die mit &cs;
+            installiert werden.</para>
+
+			<refentry id="fax.conf">
+			<refmeta>
+				<refentrytitle>fax.conf</refentrytitle>
+				<manvolnum>5</manvolnum>
+			</refmeta>
+			<refnamediv>
+				<refname>fax.conf</refname>
+				<refpurpose>Konfiguration der &cs; Faxdienste</refpurpose>
+			</refnamediv>
+			<refsect1><title>Beschreibung</title>
+				<para>Diese Datei enthält alle verfügbaren Optionen für die
+				Fax-Dienste (Fax-Empfang und -Versand), die von den Standard-Skripten,
+				die mit &cs; installiert werden, zur Verfügung gestellt werden.
+				Sie liegt unter <filename>/etc/capisuite/fax.conf</filename> oder
+				<filename>/usr/local/etc/capisuite/fax.conf</filename> (hängt von der Installation
+                  ab).</para>
+
+				<para>Sie ist in mehrere Abschnitte geteilt. Ein Abschnitt beginnt mit dem
+				Namen in eckigen Klammern (z.B. <literal>[abschnitt]</literal>) und enthält
+				Optionen im Format <literal>name="wert"</literal>.</para>
+
+				<para>Ein spezieller Abschnitt namens <literal>[GLOBAL]</literal> und ein
+				Abschnitt <literal>[&lt;username&gt;]</literal> für jeden User sind erforderlich.
+				<emphasis>Der <literal>&lt;username&gt;</literal> muss ein gültiger Linux-Benutzer
+				sein!</emphasis>.</para>
+
+				<para>Der Abschnitt <literal>[GLOBAL]</literal> definiert einige generelle Einstellungen
+				wie Verzeichnisnamen und Standardwerte für Optionen, die in den Benutzerabschnitten
+				überschrieben werden können. Die letzteren enthalten alle für einen bestimmten Benutzer
+				spezifischen Einstellungen. </para>
+			</refsect1>
+			<refsect1><title>Der Abschnitt [GLOBAL]</title>
+			<variablelist>
+				<varlistentry id="fax_spool_dir">
+					<term><option>spool_dir="/path/to/spooldir/"</option></term>
+					<listitem><para>Dieses Verzeichnis wird verwendet für die Archivierung von
+		gesendeten (oder fehlgeschlagenen) Aufträgen. Es muss existieren und der
+		Benutzer, unter dem &cs; läuft, muss Schreibrechte für seine Unterverzeichnisse
+		haben. Es gibt zwei Unterverzeichnisse:</para>
+						<variablelist>
+							<varlistentry>
+								<term><filename>spooldir/done/</filename></term>
+								<listitem><para>Erfolgreich erledigte Aufträge werden in dieses
+			Verzeichnis verschoben.</para></listitem>
+							</varlistentry>
+							<varlistentry>
+								<term><filename>spooldir/failed/</filename></term>
+								<listitem><para>Fehlgeschlagene Aufträge landen schließlich hier.
+			</para></listitem>
+							</varlistentry>
+						</variablelist>
+						<para>Diese Option ist zwingend erforderlich.</para>
+					</listitem>
+				</varlistentry>
+				<varlistentry id="fax_user_dir">
+					<term><option>fax_user_dir="/path/to/userdir/"</option></term>
+					<listitem><para>In diesem Verzeichnis werden Fax-Aufträge und empfangene
+		Dokumente gespeichert. Es muss existieren und der
+		Benutzer, unter dem &cs; läuft, muss dafür Schreibrechte besitzen. Es enthält
+						für jeden konfigurierten Benutzer ein Unterverzeichnis (benannt nach seiner
+		User-ID). Die folgenden Unterverzeichnisse befinden sich unterhalb des
+		benutzerspezifischen Verzeichnisses:</para>
+						<variablelist>
+							<varlistentry>
+								<term><filename>user_dir/username/received/</filename></term>
+								<listitem><para>Hier werden empfangene Faxe gespeichert.
+			</para></listitem>
+							</varlistentry>
+							<varlistentry>
+								<term><filename>user_dir/username/sendq/</filename></term>
+								<listitem><para>Hier werden Fax-Dateien von
+			<command>capisuitefax</command> abgelegt, die versendet werden
+			sollen.</para></listitem>
+							</varlistentry>
+						</variablelist>
+						<para>Diese Option ist zwingend erforderlich.</para>
+					</listitem>
+				</varlistentry>
+				<varlistentry id="fax_send_tries">
+					<term><option>send_tries="10"</option></term>
+					<listitem>
+						<para>Wenn ein Fax aus irgendeinem Grund nicht an den Empfänger verschickt
+			werden kann, wird es mehrmals versucht. Diese Einstellung begrenzt die Anzahl
+			der Versuche. Wenn alle Versuche fehlgeschlagen sind, wird der Auftrag im
+			Verzeichnis für fehlgeschlagene Aufträge abgelegt
+							(siehe <option>fax_spool_dir</option>) und der Benutzer bekommt eine
+			Mail.
+						</para>
+						<para>Diese Option ist optional. Wenn nichts angegeben wird, werden
+			standardmäßig 10 Versuche unternommen.</para>
+					</listitem>
+				</varlistentry>
+				<varlistentry id="fax_send_delays">
+					<term><option>send_delays="60,60,60,300,300,3600,3600,18000,36000"</option></term>
+					<listitem><para>Wenn ein Fax aus irgendeinem Grund nicht an den Empfänger
+			verschickt werden kann, wird es nochmals versucht. Diese Einstellung gibt
+						die Verzögerung in Sekunden zwischen zwei Versuchen an. Die verschiedenen
+						Werte werden durch Kommas getrennt und es dürfen
+			<emphasis>keine Leerzeichen</emphasis> enthalten sein. Die Liste sollte
+			send_tries-1 (siehe <option>fax_send_tries</option>) Werte haben -
+			wenn nicht, werden überzählige Einträge ignoriert und fehlende Einträge
+			mit dem letzten Wert aufgefüllt. Die Voreinstellung sollte mit 10 größer
+						werdenden Verzögerungen für bis zu 10 Versuchen OK sein.</para>
+						<para>Diese Option ist optional. Wenn nichts angegeben wird, wird die oben
+			gezeigte Liste genommen.</para>
+					</listitem>
+				</varlistentry>
+				<varlistentry id="fax_send_controller">
+					<term><option>send_controller="1"</option></term>
+					<listitem><para>Wenn Sie mehr als einen ISDN-Controller installiert haben
+		(einige aktive Karten für mehr als einen Basisanschluß wie die AVM C2 oder C4
+		werden für CAPI-Anwendungen wie &cs; auch als mehrere Controller abgebildet),
+		können Sie entscheiden, welcher Controller (und damit, welcher Basisanschluß)
+		für das Versenden von Faxen genutzt werden soll. Alle Controller sind nummeriert,
+		beginnend mit 1. Wenn Sie sich nicht sicher sind, welcher Controller welche
+		Nummer hat, erhöhen Sie den Log-Level in &cs; auf mindestens 2 (siehe
+		<xref linkend="configcs"/>), starten es erneut und schauen sich die
+		Log-Datei an, in der dann alle Controller aufgelistet werden. Leider kann &cs;
+		im Moment nicht mehrere Controller für das Versenden von Faxen nutzen, sodass
+						hier keine Liste erlaubt ist. Wenn Sie nur einen Controller haben, lassen Sie
+						den Wert einfach auf <literal>1</literal> stehen.</para>
+						<para>Diese Option ist optional. Wenn nichts angegeben wird, wird
+		standardmäßig der Controller 1 verwendet.</para>
+					</listitem>
+				</varlistentry>
+				<varlistentry id="fax_outgoing_MSN">
+					<term><option>outgoing_MSN="&lt;Ihre MSN&gt;"</option></term>
+					<listitem><para>Diese Nummer wird als Ihre eigene Nummer für ausgehende Rufe
+						verwendet. Wenn Sie nicht angegeben wird, wird die erste Nummer von
+						fax_numbers verwendet (siehe Benutzer-Abschnitte). Ist diese
+						ebenfalls nicht gesetzt, so kann der Benutzer kein Fax verschicken. Bitte
+						ersetzten Sie den Eintrag mit einer gültigen MSN Ihres ISDN-Anschlusses oder
+						lassen ihn leer. Dieser Wert kann in den Benutzer-Abschnitten individuell
+						überschrieben werden.</para>
+						<para>Diese Option ist optional. Wenn nichts angegeben wird, wird
+						standardmäßig die erste MSN von <option>fax_numbers</option> verwendet.</para>
+					</listitem>
+				</varlistentry>
+				<varlistentry id="fax_outgoing_timeout">
+					<term><option>outgoing_timeout="60"</option></term>
+					<listitem><para>Standard-Einstellung, die angibt, wieviele Sekunden nach dem
+		Wählen der Nummer auf eine Verbindung gewartet wird. Dieser Wert kann in den
+		Benutzer-Abschnitten individuell überschrieben werden.</para>
+						<para>Diese Option ist optional. Wenn nichts angegeben wird, wird
+		standardmäßig 60 Sekunden gewartet.</para>
+					</listitem>
+				</varlistentry>
+				<varlistentry id="fax_dial_prefix">
+					<term><option>dial_prefix=""</option></term>
+					<listitem>
+						<para>Wenn hier etwas angegeben ist, wird es als Präfix vor jede Nummer
+			eingefügt, die an <command>capisuitefax</command> übergeben wird.
+			Dies ist z.B. sehr nützlich, wenn Ihr ISDN-Adapter an einer Telefonanlage
+							hängt, die eine "0" für externe Anrufe benötigt. Es kann aber auch später
+							für ein einzelnes Fax-Dokument deaktiviert werden, sodass diese Einstellung
+			nicht interne Anrufe ohne Präfix verhindert.
+						</para>
+						<para>Diese Option ist optional. Wenn nichts angegeben wird, wird
+		standardmäßig kein Präfix verwendet.</para>
+					</listitem>
+				</varlistentry>
+				<varlistentry id="fax_stationID">
+					<term><option>fax_stationID="&lt;Ihre faxID&gt;"</option></term>
+					<listitem><para>Absenderkennung, die beim Versenden eines Fax-Dokuments
+		verwendet wird. Die Absenderkennung ist normalerweise Ihre Fax-Nummer im
+						internationalen Format, z.B. "+49 89 123456" für eine Nummer in München in
+		Deutschland. Absenderkennungen dürfen nur aus dem "+"-Zeichen, Leerzeichen und
+						den Ziffern 0-9 bestehen. Die maximale Länge ist 20. Dieser Wert kann in den
+		Benutzer-Abschnitten individuell überschrieben werden.</para>
+						<para>Diese Option ist zwingend erforderlich.</para>
+					</listitem>
+				</varlistentry>
+				<varlistentry id="fax_headline">
+					<term><option>fax_headline="&lt;Ihre Fax-Kopfzeile&gt;"</option></term>
+					<listitem><para>Fax-Kopfzeile, die beim Versenden eines Fax-Dokuments
+						verwendet wird. Wo und ob diese Kopfzeile angezeigt wird, hängt von der
+						Implementierung Ihres CAPI-Treibers ab. Die Kopfzeile sollte eine vernünftige
+						Länge haben, damit sie auf den oberen Rand einer Seite passt, aber es gibt
+						keine bestimmte Begrenzung.</para>
+						<para>Diese Option ist optional. Wenn nichts angegeben wird, wird
+						standardmäßig keine Kopfzeile verwendet.</para>
+					</listitem>
+				</varlistentry>
+				<varlistentry id="fax_email_from">
+					<term><option>fax_email_from="&lt;Mailadresse&gt;"</option></term>
+					<listitem><para>Hier kann die Mailadresse gesetzt werden, die &cs;
+						als Absender bei der Mailzustellung des Faxdokumentes angibt.</para>
+						<para>Diese Option ist optional. Wenn nichts angegeben wird, wird
+						standardmäßig der Empfänger auch als Absender verwendet (wenn
+						also der User gernot ein Fax empfängt, dann ist der Absender und
+						Empfänger der versandten Mail "gernot".</para>
+					</listitem>
+				</varlistentry>
+			</variablelist>
+			</refsect1>
+			<refsect1><title>Die Benutzer-Abschnitte</title>
+			<variablelist>
+				<varlistentry>
+					<term><option>outgoing_MSN</option></term>
+					<listitem><para>Benutzerspezifischer Wert für die globale Option
+		im Abschnitt <option>[GLOBAL]</option> oben</para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term><option>outgoing_timeout</option></term>
+					<listitem><para>Benutzerspezifischer Wert für die globale Option
+		im Abschnitt <option>[GLOBAL]</option> oben</para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term><option>fax_stationID</option></term>
+					<listitem><para>Benutzerspezifischer Wert für die globale Option
+		im Abschnitt <option>[GLOBAL]</option> oben</para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term><option>fax_headline</option></term>
+					<listitem><para>Benutzerspezifischer Wert für die globale Option
+					im Abschnitt <option>[GLOBAL]</option> oben</para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term><option>fax_email_from</option></term>
+					<listitem><para>Benutzerspezifischer Wert für die globale Option
+					im Abschnitt <option>[GLOBAL]</option> oben</para></listitem>
+				</varlistentry>
+				<varlistentry id="fax_numbers">
+					<term><option>fax_numbers="&lt;Nummer1&gt;,&lt;Nummer2&gt;,..."</option></term>
+					<listitem><para>Eine Liste mit Nummern, auf denen dieser Benutzer eingehende
+		Fax-Anrufe empfangen möchte. Diese Nummern werden benutzt, um zwischen Benutzern
+		zu unterscheiden - die selbe Nummer darf also nicht in mehr als einem
+		Benutzerabschnitt erscheinen! Die Nummern sind durch Kommas getrennt und
+		es sind <emphasis>keine Leerzeichen</emphasis> erlaubt. Die erste Nummer
+		der Liste dient auch als Ihre eigene Nummer für ausgehende Faxe, wenn
+						outgoing_MSN nicht angegeben wurde (siehe <option>outgoing_MSN</option>)
+		</para>
+
+						<para>Wenn Sie die selbe Nummer zum Empfangen von Fax- und Sprach-Anrufen
+		nutzen nöchten, geben Sie sie hier bitte <emphasis>nicht</emphasis> an.
+		Verwenden Sie stattdessen die voice_numbers Option
+						(siehe <xref linkend="answering_machine.conf"/>) - der Anrufbeantworter hat eine
+		eingebaute Fax-Erkennung und kann auch Faxe empfangen.</para>
+
+						<para>Wenn die Liste nur den <literal>*</literal> enthält, werden
+						<emphasis>alle</emphasis> eingehenden Anrufe für diesen Benutzer
+		angenommen (bitte mit Vorsicht benutzen!). Dies ist nur sinnvoll bei einem
+		Setup mit nur einem Benutzer, der alle Anrufe als Fax empfangen möchte.
+						</para>
+
+						<para>Wenn aus irgendeinem Grund für spezielle MSNs
+		<emphasis>keine Zielnummer</emphasis> übertragen wird (die österreichische
+		Telekom macht das für die Haupt-MSN, die wird als "Global Call" bezeichnet),
+						können Sie das besondere Zeichen <literal>-</literal> benutzen. Dies
+		bedeutet "no destination number available".</para>
+						<para>Diese Option ist optional. Wenn nichts angegeben wird, kann der Benutzer
+						keine Fax-Dokumente empfangen.</para>
+					</listitem>
+				</varlistentry>
+				<varlistentry id="fax_email">
+					<term><option>fax_email=""</option></term>
+					<listitem><para>Wenn hier etwas angegeben wird, werden die Strings als
+		E-Mail-Adressen interpretiert, an die empfangene Faxe geschickt werden.
+		Mehrere Adressen werden durch Kommas getrennt. Wenn der Eintrag leer ist,
+		werden sie an den System-Account auf dem System, auf dem &cs; läuft, geschickt.
+		Die Adresse wird auch für Status-Reports für versendete Fax-Aufträge benutzt.
+						Wenn Sie überhaupt nicht möchten, dass E-Mails verschickt werden, verwenden Sie
+						die action-Option (siehe <option>fax_action</option>).</para>
+						<para>Diese Option ist optional. Wenn nichts angegeben wird, wird die Mail
+		an den System-Account geschickt.</para>
+					</listitem>
+				</varlistentry>
+				<varlistentry id="fax_action">
+					<term><option>fax_action="MailAndSave"</option></term>
+					<listitem><para>Hier können Sie festlegen, welche Aktionen ausgeführt werden,
+			wenn ein Anruf empfangen wurde. Momentan werden zwei mögliche Aktionen
+			unterstützt:
+							<variablelist>
+								<varlistentry>
+									<term><option>MailAndSave</option></term>
+									<listitem><para>Der empfangene Anruf wird an die angegebene
+				Adresse (siehe <option>fax_email</option>) geschickt
+				und im <option>fax_user_dir</option> (siehe Abschnitt [GLOBAL])
+				gespeichert.</para>
+									</listitem>
+								</varlistentry>
+								<varlistentry>
+									<term><option>SaveOnly</option></term>
+									<listitem><para>Der empfangene Anruf wird nur im
+										<option>fax_user_dir</option> (siehe
+										Abschnitt [GLOBAL]) gespeichert.
+									</para>
+									</listitem>
+								</varlistentry>
+							</variablelist>
+						</para>
+						<para>Diese Option ist zwingend erforderlich.</para>
+					</listitem>
+				</varlistentry>
+			</variablelist>
+			</refsect1>
+			<refsect1 condition="man"><title>Siehe Auch</title>
+				<para><simplelist type="inline">
+					<member><xref linkend="capisuite"/></member>
+					<member><xref linkend="capisuite.conf"/></member>
+					<member><xref linkend="answering_machine.conf"/></member>
+					<member><xref linkend="capisuitefax"/></member>
+				</simplelist></para>
+			</refsect1>
+			</refentry>
+
+			<refentry id="answering_machine.conf">
+			<refmeta>
+				<refentrytitle>answering_machine.conf</refentrytitle>
+				<manvolnum>5</manvolnum>
+			</refmeta>
+			<refnamediv>
+				<refname>answering_machine.conf</refname>
+				<refpurpose>Konfiguration des Anrufbeantworters von &cs;</refpurpose>
+			</refnamediv>
+			<refsect1><title>Beschreibung</title>
+				<para>Diese Datei enthält alle verfügbaren Optionen für den Anrufbeantworter,
+				der von den mit &cs; installierten Standard-Skripten bereitgestellt wird. Sie
+				wird von <filename>/etc/capisuite/answering_machine.conf</filename> oder
+				<filename>/usr/local/etc/capisuite/answering_machine.conf</filename>
+				(abhängig von der Installation) gelesen.</para>
+
+				<para>Die Datei enthält mehrere Abschnitte. Ein Abschnitt beginnt mit dem Namen
+				in eckigen Klammern (z.B. <literal>[abschnitt]</literal>) und enthält Einstellungen
+				im Format <literal>name="wert"</literal>.</para>
+
+				<para>Ein spezieller Abschnitt namens <literal>[GLOBAL]</literal> und ein
+				Abschnitt <literal>[&lt;username&gt;]</literal> für jeden Benutzer sind
+				erforderlich. <emphasis>Der <literal>&lt;username&gt;</literal> muss dabei
+				einen vorhandenen Linux-User bezeichnen!</emphasis></para>
+
+				<para>Der Abschnitt <literal>[GLOBAL]</literal> definiert einige generelle
+				Einstellungen wie Verzeichnisnamen und Voreinstellungen für Optionen, die in den
+				Benutzerabschnitten überschrieben werden können. Die Benutzerabschnitte enthalten
+				alle Optionen, die spezifisch für einen bestimmten Benutzer sind.</para>
+			</refsect1>
+			<refsect1><title>Der Abschnitt [GLOBAL]</title>
+			<variablelist>
+				<varlistentry id="voice_audio_dir">
+					<term><option>audio_dir="/path/to/audiodir/"</option></term>
+					<listitem><para>Das Anrufbeantworter-Skript nutzt verschiedene WAV-Dateien,
+						z.B. eine globale Ansage, wenn der Benutzer keine eigene hat, sowie einige
+						gesprochene Worte für die Fernabfrage und das dabei verwendete Menü. Diese
+						Audio-Dateien werden in diesem Verzeichnis gesucht. Wenn user_audio_files
+						aktiviert ist (siehe <option>user_audio_files</option>), kann jeder Benutzer
+						seine eigenen Audio-Schnipsel in seinem user_dir (siehe
+						<option>voice_user_dir</option>) verwenden.</para>
+					<para>Diese Option ist zwingend erforderlich.</para>
+					</listitem>
+				</varlistentry>
+				<varlistentry id="voice_user_dir">
+					<term><option>voice_user_dir="/path/to/userdir/"</option></term>
+					<listitem><para>In diesem Verzeichnis werden benutzerspezifische Daten
+		gespeichert. Es muss existieren und der Benutzer, unter dem &cs; läuft, muss
+		dafür Schreibrechte besitzen. Es enthält für jeden konfigurierten Benutzer ein
+		Unterverzeichnis (benannt nach seiner User-ID). Die folgenden Unterverzeichnisse
+		befinden sich unterhalb des benutzerspezifischen Verzeichnisses:</para>
+						<variablelist>
+							<varlistentry>
+								<term><filename>user_dir/username/</filename></term>
+								<listitem><para>Hier kann der Benutzer seine eigenen Audio-Dateien
+								(siehe <option>user_audio_files</option>) ablegen. Die
+								benutzerdefinierte Ansage wird ebenfalls hier gespeichert.
+			</para></listitem>
+							</varlistentry>
+							<varlistentry>
+								<term><filename>user_dir/username/received/</filename></term>
+								<listitem><para>Hier werden empfangene Sprach-Anrufe gespeichert.
+			</para></listitem>
+							</varlistentry>
+						</variablelist>
+						<para>Diese Option ist zwingend erforderlich.</para>
+					</listitem>
+				</varlistentry>
+				<varlistentry id="voice_user_audio_files">
+					<term><option>user_audio_files="0"</option></term>
+					<listitem>
+						<para>Wenn dies auf <literal>1</literal> gesetzt wird, kann jeder Benutzer
+							seine eigenen Audio-Dateien in seinem Benutzerverzeichnis verwenden
+							(siehe <option>voice_user_dir</option>). Wenn dies auf
+							<literal>0</literal> gesetzt wird, wird nur das audio_dir (siehe
+							<option>voice_audio_dir</option>) durchsucht.
+						</para>
+						<para>Diese Option ist optional. Wenn nichts angegeben wird, werden keine
+		benutzerspezifischen Audio-Dateien verwendet (0).</para>
+					</listitem>
+				</varlistentry>
+				<varlistentry id="voice_delay">
+					<term><option>voice_delay="15"</option></term>
+					<listitem><para>Setzt den Standard-Wert für die Verzögerung, mit der eingehende
+		Anrufe angenommen werden (in Sekunden). Ein Wert von <literal>10</literal>
+		bedeutet, dass der Anrufbeantworter einen eingehenden Anruf 10 Sekunden nach
+						der eingehenden Verbindungsanforderung annimmt. Dieser Wert kann in
+		den Benutzer-Abschnitten individuell überschrieben werden.</para>
+						<para>Diese Option ist zwingend erforderlich.</para>
+					</listitem>
+				</varlistentry>
+				<varlistentry id="voice_announcement">
+					<term><option>announcement="announcement.la"</option></term>
+					<listitem><para>Setzt den Standard-Namen für die Benutzer-Ansage.
+						Die Ansagen werden dann in
+		<filename>user_dir/username/announcement</filename> gesucht. Wenn sie dort,
+		nicht gefunden wird, wird eine globale Ansage, die die angerufene MSN
+		enthält, abgespielt. Dieser Wert kann in den Benutzer-Abschnitten individuell
+		überschrieben werden.</para>
+						<para>Diese Option ist optional. Wenn nichts angegeben wird, wird
+		"announcement.la" angenommen.</para>
+					</listitem>
+				</varlistentry>
+				<varlistentry id="voice_record_length">
+					<term><option>record_length="60"</option></term>
+					<listitem><para>Einstellung für die maximale Aufnahmelänge in Sekunden.
+		Dieser Wert kann in den Benutzer-Abschnitten individuell überschrieben
+		werden.</para>
+		<para>Diese Option ist optional. Wenn nichts angegeben wird, beträgt die
+		maximale Aufnahmelänge 60 Sekunden.</para>
+					</listitem>
+				</varlistentry>
+				<varlistentry id="voice_record_silence_timeout">
+					<term><option>record_silence_timeout="5"</option></term>
+					<listitem><para>Einstellung für den Stille-Timeout während der Aufnahme in
+		Sekunden. Wenn dieser Wert größer als 0 ist, wird die Aufnahme beendet, wenn
+						für die angegebene Zeit Stille erkannt wird. Um den Timeout zu deaktivieren,
+		setzen Sie ihn auf 0. Dieser Wert kann in den Benutzer-Abschnitten individuell
+		überschrieben werden.</para>
+		<para>Diese Option ist optional. Wenn nichts angegeben wird, beträgt der
+		Timeout 5 Sekunden.</para>
+					</listitem>
+				</varlistentry>
+				<varlistentry id="voice_email_from">
+					<term><option>voice_email_from="&lt;Mailadresse&gt;"</option></term>
+					<listitem><para>Hier kann die Mailadresse gesetzt werden, die &cs;
+						als Absender bei der Mailzustellung der aufgezeichneten
+						Sprachnachricht angibt.</para>
+						<para>Diese Option ist optional. Wenn nichts angegeben wird, wird
+						standardmäßig der Empfänger auch als Absender verwendet (wenn
+						also der User gernot eine Sprachnachricht empfängt, dann ist der
+						Absender und Empfänger der versandten Mail "gernot".</para>
+					</listitem>
+				</varlistentry>
+			</variablelist></refsect1>
+			<refsect1><title>Die Benutzerabschnitte</title>
+			<variablelist>
+				<varlistentry>
+					<term><option>voice_delay</option></term>
+					<listitem><para>Benutzerspezifischer Wert für die globale Option
+		im Abschnitt <option>[GLOBAL]</option> oben</para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term><option>announcement</option></term>
+					<listitem><para>Benutzerspezifischer Wert für die globale Option
+		im Abschnitt <option>[GLOBAL]</option> oben</para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term><option>record_length</option></term>
+					<listitem><para>Benutzerspezifischer Wert für die globale Option
+		im Abschnitt <option>[GLOBAL]</option> oben</para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term><option>record_silence_timeout</option></term>
+					<listitem><para>Benutzerspezifischer Wert für die globale Option
+		im Abschnitt <option>[GLOBAL]</option> oben</para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term><option>voice_email_from</option></term>
+					<listitem><para>Benutzerspezifischer Wert für die globale Option
+		im Abschnitt <option>[GLOBAL]</option> oben</para></listitem>
+				</varlistentry>
+				<varlistentry id="voice_numbers">
+					<term><option>voice_numbers="&lt;Nummer1&gt;,&lt;Nummer2&gt;,..."</option></term>
+					<listitem><para>Eine Liste mit Nummern, auf denen dieser Benutzer eingehende
+		Sprach-Anrufe empfangen möchte. Diese Nummern werden benutzt, um zwischen
+		Benutzern zu unterscheiden - die selbe Nummer darf also nicht in mehr als einem
+		Benutzerabschnitt erscheinen! Die Nummern sind durch Kommas getrennt und
+		es sind <emphasis>keine Leerzeichen</emphasis> erlaubt. Das
+		Anrufbeantworter-Skript macht auch eine automatische Fax-Erkennung, sodass ein
+						Fax an diese Nummer geschickt werden kann. Wenn die Liste nur den
+		<literal>*</literal> enthält, werden <emphasis>alle</emphasis>
+		eingehenden Anrufe für diesen Benutzer angenommen (bitte mit Vorsicht benutzen!).
+		Dies ist nur sinnvoll bei einem Setup mit nur einem Benutzer, der alle Anrufe
+		empfangen möchte.</para>
+
+						<para>Wenn aus irgendeinem Grund für spezielle MSNs
+		<emphasis>keine Zielnummer</emphasis> übertragen wird (die österreichische
+		Telekom macht das für die Haupt-MSN, die wird als "Global Call" bezeichnet),
+						können Sie das besondere Zeichen <literal>-</literal> benutzen. Dies
+		bedeutet "no destination number available".</para>
+
+						<para>Diese Option ist optional. Wenn nichts angegeben wird, kann der Benutzer
+		keine Sprach-Anrufe empfangen.</para>
+					</listitem>
+				</varlistentry>
+				<varlistentry id="voice_email">
+					<term><option>voice_email=""</option></term>
+					<listitem><para>Wenn hier etwas angegeben wird, werden die Strings als
+		E-Mail-Adressen interpretiert, an die empfangene Faxe und Sprach-Anrufe
+		geschickt werden. Mehrere Adressen werden durch Kommas getrennt. Wenn der
+		Eintrag leer ist, werden sie an den System-Account auf dem System, auf dem &cs;
+		läuft, geschickt. Wenn  überhaupt nicht möchten, dass E-Mails verschickt
+		werden, verwenden  die action Option (siehe
+		<option>voice_action</option>).</para>
+						<para>Diese Option ist optional. Wenn nichts angegeben wird, wird die Mail
+		an den System-Account geschickt.</para>
+					</listitem>
+				</varlistentry>
+				<varlistentry id="voice_pin">
+					<term><option>pin="&lt;Ihre PIN&gt;"</option></term>
+					<listitem><para>Der Anrufbeantworter hat auch eine Fernabfrage-Funktion.
+						Diese Funktion kann benutzt werden, wenn, während die Ansage abgespielt wird,
+		eine PIN (Personal Identification Number) eingegeben wird. Diese PIN kann hier
+		definiert werden. Wenn  die Fernabfrage-Funktion nicht nutzen möchten, geben
+		Sie hier einfach nichts an. Die PIN hat keine maximale Länge - aber Sie sollten
+						vielleicht keine 200 Ziffern verwenden, da Sie sie sich ansonsten nicht so gut
+		merken können (zumindest könnte ich das nicht). ;-)</para>
+		<para>Diese Option ist optional. Wenn nichts angegeben wird, wird die
+		Fernabfrage-Funktion deaktiviert.</para>
+					</listitem>
+				</varlistentry>
+				<varlistentry id="voice_action">
+					<term><option>voice_action="MailAndSave"</option></term>
+					<listitem><para>Hier können Sie festlegen, welche Aktionen ausgeführt werden,
+			wenn ein Anruf empfangen wurde. Momentan werden drei mögliche Aktionen
+			unterstützt:
+							<variablelist>
+								<varlistentry>
+									<term><option>MailAndSave</option></term>
+									<listitem><para>Der empfangene Anruf wird an die angegebene
+				Adresse (siehe <option>voice_email</option>) geschickt und
+				im voice_user_dir
+										(siehe <option>voice_user_dir</option>) gespeichert.
+										</para>
+									</listitem>
+								</varlistentry>
+								<varlistentry>
+									<term><option>SaveOnly</option></term>
+									<listitem><para>Der empfangene Anruf wird nur im voice_user_dir
+									(siehe <option>voice_user_dir</option>) gespeichert.
+				</para></listitem>
+								</varlistentry>
+								<varlistentry>
+									<term><option>None</option></term>
+									<listitem><para>Es wird nur die Ansage abgespielt - es wird
+				nichts aufgenommen.</para>
+									</listitem>
+								</varlistentry>
+							</variablelist>
+						</para>
+						<para>Diese Option ist zwingend erforderlich.</para>
+					</listitem>
+				</varlistentry>
+			</variablelist>
+			</refsect1>
+			<refsect1 condition="man"><title>Siehe Auch</title>
+				<para><simplelist type="inline">
+					<member><xref linkend="capisuite"/></member>
+					<member><xref linkend="capisuite.conf"/></member>
+					<member><xref linkend="fax.conf"/></member>
+					<member><xref linkend="capisuitefax"/></member>
+				</simplelist></para>
+			</refsect1>
+			</refentry>
+		</sect2>
+		<sect2 id="deleteoldfiles"><title>Alte Dateien löschen</title>
+
+			<para>Wie oben beschrieben, werden alle ein- und ausgehenden Anrufe im lokalen Dateisystem
+			gespeichert, um sicher zu sein, dass nichts verloren geht. &cs; führt keine Aufräumarbeiten 
+			durch, sodass diese Dateien für immer auf Ihrem System verbleiben, wenn Sie nicht von Zeit zu
+			Zeit aufräumen.</para>
+
+			<para>Da es nicht sehr bequem ist, dies von Hand zu machen, empfehle ich, diesen Prozess zu
+			automatisieren. <application>cron</application> ist prädestiniert für solch eine Aufgabe.
+			Auf den meisten modernen GNU/Linux-Distributionen können Sie einfach Skripte in
+			<filename>/etc/cron.daily</filename> ablegen, die dann automatisch einmal am Tag ausgeführt
+            werden.</para>
+
+			<para>Ein Beispiel für ein Bash-Skript, das Sie verwenden können, liegt dem &cs;-Paket bei.
+			Kopieren Sie einfach <filename>capisuite.cron</filename> nach
+            <filename>/etc/cron.daily/capisuite</filename> und stellen Sie sicher, das es die
+            richtigen Zugriffsrechte besitzt (Owner root, Executable-Bit gesetzt).</para>
+
+			<para>Editieren Sie nun die Datei <filename>cronjob.conf</filename> und kopieren Sie es
+			in Ihr &cs;-Konfigurationsverzeichnis (normalerweise <filename>/etc/capisuite</filename>
+			oder <filename>/usr/local/etc/capisuite</filename>). Es sagt dem Cron-Job, wie lange die
+			Dateien in den verschiedenen Verzeichnisse gespeichert bleiben sollen.</para>
+
+			<para>Die folgenden Optionen sind verfügbar:</para>
+			<variablelist>
+				<varlistentry>
+					<term><option>MAX_DAYS_RCVD="&lt;Wert&gt;"</option></term>
+					<listitem><para>Dateien, die in den Empfangs-Verzeichnissen der Benutzer gespeichert
+                    sind und auf die in den letzten <option>&lt;Wert&gt;</option> Tagen nicht 
+					zugegriffen wurde, werden gelöscht. Setzen Sie diesen Wert auf <option>0</option>,
+                    um das automatische Löschen zu deaktivieren.</para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term><option>MAX_DAYS_DONE="&lt;Wert&gt;"</option></term>
+					<listitem><para>Dateien, die im globalen Erledigt-Verzeichnis gespeichert
+                    sind und auf die in den letzten <option>&lt;Wert&gt;</option> Tagen nicht 
+					zugegriffen wurde, werden gelöscht. Setzen Sie diesen Wert auf <option>0</option>,
+                    um das automatische Löschen zu deaktivieren.</para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term><option>MAX_DAYS_FAILED="&lt;Wert&gt;"</option></term>
+					<listitem><para>Dateien, die im globalen Fehlgeschlagen-Verzeichnis gespeichert
+                    sind und auf die in den letzten <option>&lt;Wert&gt;</option> Tagen nicht 
+					zugegriffen wurde, werden gelöscht. Setzen Sie diesen Wert auf <option>0</option>,
+                    um das automatische Löschen zu deaktivieren.</para></listitem>
+				</varlistentry>
+			</variablelist>
+		</sect2>
+	</sect1>
+	<sect1 id="usingscripts"><title>&cs; mit den Standard-Skripten verwenden</title>
+		<sect2 id="usingscripts_receive"><title>Anrufe empfangen</title>
+			<para>Dies ist ein schön kurzer Abschnitt. Wenn Sie &cs; und die Skripte einmal konfiguriert
+            haben &cs; erfolgreich gestartet haben, brauchen Sie nichts mehr zu tun. Sie bekommen Ihre Mails
+            wie im <xref linkend="howscriptswork"/> beschrieben und das war's. Sie müssen nur Ihr
+			Mail-Programm so einrichten, dass Sie lokale Mails empfangen können. Viel Spaß! :-)</para>
+		</sect2>
+		<sect2 id="usingscripts_remoteinquiry"><title>Eine Fernabfrage machen</title>
+			<para>Um eine Fernabfrage zu machen, geben Sie bitte Ihre PIN (siehe
+			<xref linkend="answering_machine.conf"/>) ein, während die Ansage des Anrufbeantworters abgespielt wird.
+			Nach einigen Sekungen bekommen Sie ein "Sprach-Menü", das Ihnen sagt, wie Sie Ihre eigene Ansage
+			für den Anrufbeantworter aufnehmen können oder wie Sie empfangene Anrufe abspielen können.
+            </para>
+		</sect2>
+		<sect2 id="usingscripts_send"><title>Faxe Versenden</title>
+			<para>Die Standard-Skripte für &cs; enthalten auch ein Kommandozeilen-Tool zum Versenden
+			von Faxen namens <command>capisuitefax</command>. Es wird im nächsten Abschnitt genauer
+			beschrieben.</para>
+
+			<refentry id="capisuitefax">
+			<refmeta>
+				<refentrytitle>capisuitefax</refentrytitle>
+				<manvolnum>1</manvolnum>
+			</refmeta>
+			<refnamediv>
+				<refname>capisuitefax</refname>
+				<refpurpose>Faxe mit den &cs;-Standardskripten versenden</refpurpose>
+			</refnamediv>
+			<refsynopsisdiv>
+				<cmdsynopsis>
+					<command>capisuitefax</command>
+					<arg>-q</arg>
+					<arg>-n</arg>
+					<arg>-u <replaceable>user</replaceable></arg>
+                                        <arg>-A <replaceable>adr</replaceable></arg>
+                                        <arg>-S <replaceable>subj</replaceable></arg>
+                                        <arg choice="plain">-d <replaceable>number</replaceable></arg>
+					<arg choice="plain" rep="repeat">file</arg>
+				</cmdsynopsis>
+                                <cmdsynopsis>
+                                        <command>capisuitefax</command>
+                                        <arg>-q</arg>
+                                        <arg choice="plain">-a <replaceable>id</replaceable></arg>
+                                </cmdsynopsis>
+                                <cmdsynopsis>
+                                        <command>capisuitefax</command>
+                                        <arg choice="plain">-h</arg>
+                                </cmdsynopsis>
+                                <cmdsynopsis>
+                                        <command>capisuitefax</command>
+                                        <arg choice="plain">-l</arg>
+                                </cmdsynopsis>
+			</refsynopsisdiv>
+
+			<refsect1><title>Beschreibung</title>
+
+			<para>Zu den mit &cs; installierten Standardskripten gehört das Tool <command>capisuitefax</command>
+			zum Senden von Faxen.</para>
+
+			<para>Es wird mit einigen Parametern aufgerufen, um ihm
+			zu sagen, welche Datei (momentan werden nur PostScript- und PDF-Dateien unterstützt)
+			an welche Nummer verschickt werden soll. Es fügt dann den in das richtige Format konvertierten
+            Job in die Send-Queue ein, von wo aus er von einem anderen &cs;-Skript genommen und an den
+            Empfänger verschickt wird. Wenn das Versenden erfolgreich beendet wurde oder nach mehreren
+            Versuchen endgültig fehlgeschlagen ist, erhält der/die entsprechende Benutzer(in) ein E-Mail, die ihm/ihr
+			mitteilt, was passiert ist.</para>
+			</refsect1>
+
+			<refsect1><title>Optionen</title>
+			<variablelist>
+				<varlistentry>
+					<term><option>-a id</option></term>
+					<listitem><para>Bricht den Auftrag mit der angegebenen ID ab. Um die ID eines
+                    Auftrags zu ermittelen, können Sie die Option <option>-l</option>
+					verwenden.</para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term><option>-A adr</option></term>
+					<listitem><para>Der Adressat des Faxes. Diese Angabe dient (zur Zeit) nur
+					zur leichteren Identifikation eines Jobs. Sie wird in der versandten Status-Mail
+					später zitiert.</para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term><option>-d dialstring</option></term>
+					<listitem><para>Die Nummer, die angerufen werden soll (Empfänger des Faxes).
+                    </para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term><option>-h</option></term>
+					<listitem><para>Zeigt eine kurze Kommandozeilen-Hilfe an.</para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term><option>-l</option></term>
+					<listitem><para>Zeigt die Aufträge an, die sich momentan in der Send-Queue
+                    befinden.</para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term><option>-n</option></term>
+					<listitem><para>Nicht den konfigurierten Präfix für diesen Auftrag verwenden.
+                    Dies ist nützlich für interne Aufträge.</para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term><option>-q</option></term>
+					<listitem><para>Sei still, gib keine informativen Meldungen aus!
+                    </para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term><option>-S subj</option></term>
+					<listitem><para>Der Betreff des Faxes. Diese Angabe dient (zur Zeit) nur
+					zur leichteren Identifikation eines Jobs. Sie wird in der versandten Status-Mail
+					später zitiert.</para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term><option>-u user</option></term>
+					<listitem><para>
+						Fax als anderer Benutzer versenden. Nur möglich, wenn <command>capisuitefax</command>
+						als Benutzer <literal>root</literal> aufgerufen wird. Diese Option ist hauptsächlich
+						für Erweiterungen, z. B. zum Faxen im Netzwerk, nützlich.
+					</para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term><option>file...</option></term>
+					<listitem><para>Eine oder mehrere PostScript/PDF-Dateien, die an diesen Empfänger
+						verschickt werden sollen. Mehrere Dateien erzeugen mehrere separate
+						Fax-Aufträge).
+					</para></listitem>
+				</varlistentry>
+			</variablelist>
+			</refsect1>
+			<refsect1 condition="man"><title>Siehe Auch</title>
+				<para><simplelist type="inline">
+					<member><xref linkend="capisuite"/></member>
+					<member><xref linkend="capisuite.conf"/></member>
+					<member><xref linkend="fax.conf"/></member>
+					<member><xref linkend="answering_machine.conf"/></member>
+				</simplelist></para>
+			</refsect1>
+			</refentry>
+		</sect2>
+	</sect1>
+</chapter>
+
+<chapter id="userguide"><title>Users Guide</title>
+
+		<para>Im vorigen Kapitel haben Sie gesehen, wie die mit &cs; gelieferten Standard-Skripte genutzt
+        werden. Das Hauptziel bei der Entwicklung von &cs; war aber nicht, eine perfekte 
+        "Ready-to-Use"-Anwendung zur Verfügung zu stellen. Ich wollte ein Tool entwickeln, mit dem jeder
+        auf einfache Weise seine <emphasis>eigenen</emphasis> Anwendungen schreiben kann. Ich werde
+        Ihnen in den nächsten Abschnitten zeigen, wie das geht.</para>
+
+
+	<sect1 id="ug_python"><title>Einführung in Python</title>
+
+ 		<para>Als ich über die Skriptsprache nachdachte, die ich in &cs; integrieren wollte, war meine
+		erste Idee, eine eigene, einfache zu entwickeln. Aber je tiefer ich in das Thema einstieg, desto
+		mehr stellte sich heraus, dass eine allgemeine Sprache sehr viel nützlicher sein würde, als jedes
+		benötigte Rad neu zu erfinden. Also suchte ich nach einer einfach zu integrierenden (und zu 
+		lernenden) Sprache. Die, die mir am besten gefiel, war Python - und sie hatte eine schöne
+		Dokumentation über das Einbettten in andere Applikation. Deshalb habe ich mich für sie entschieden
+        und ich habe es bis jetzt nicht bereut. :-)</para>
+
+		<para>Also, die erste Sache, die zu tun ist, ist Python zu lernen. Aber keine Angst -
+		sie wurde als eine Anfängersprache entwickelt und Guido (Guido van Rossum, der Erfinder von Python)
+		hat das meiner Meinung nach sehr gut gemacht.</para>
+
+		<para>In den nächsten Abschnitten werde ich Ihnen eine kurze Einführung in die Features von Python
+		geben, die Sie am häufigsten für &cs; brauchen werden. Da dies weder ein Python-Handbuch noch ein
+		Programmier-Tutorial sein soll, gehe ich davon aus, dass Sie bereits mit den Grundkonzpten
+        heutiger verbreiteter prozeduraler und objektorientierter Sprachen vertraut sind.</para>
+
+		<para>Wenn nicht, empfehle ich Ihnen, mit Hilfe eines Buchs Python zu erlernen - es gibt viele
+		davon in verschiedenen Sprachen. Auf der Python-Homepage unter 
+        <ulink url="http://www.python.org"/> finden Sie ein reichhaltiges Angebot an kostenlosen
+        Handbüchern und Tutorials.</para>
+
+		<sect2 id="python_basics"><title>Python-Grundlagen</title>
+
+		<para>Python unterstützt die meisten Features, die Sie von anderen Sprachen kennen. Hier ist die
+		Syntax der Basisoperationen einer Python-Session. Eine Python-Session ist ein nettes Feature
+		des Interpreters: sie wird einfach gestartet, indem Sie <command>python</command>
+		in einer Shell eingeben und Sie erhalten eine Eingabeaufforderung:</para>
+
+		<screen
+		>gernot@linux:~> python
+Python 2.2.1 (#1, Sep 10 2002, 17:49:17)
+[GCC 3.2] on linux2
+Type "help", "copyright", "credits" or "license" for more
+information.
+&gt;&gt;&gt;</screen>
+
+		<para>Wie Sie sehen, ist die Eingabeaufforderung von Python <literal>&gt;&gt;&gt;</literal>.
+		Wenn Sie mehrzeilige Befehle eingeben, zeigt Python eine zweite Eingabeaufforderung
+		an: <literal>...</literal></para>
+
+			<screen>&gt;&gt;&gt; if (1==2):
+...     print "Now THAT's interesting!"
+...</screen>
+
+		<para>Ok, gehen wir weiter:</para>
+
+		<screen>&gt;&gt;&gt; # Kommentare beginnen mit # am Anfang der Zeile
+&gt;&gt;&gt; # jetzt die gewöhnlichen ersten Schritte
+&gt;&gt;&gt; print "hello world"
+hello world
+&gt;&gt;&gt; # Variablen
+&gt;&gt;&gt; a=5 # keine separate Deklarationen erforderlich
+&gt;&gt;&gt; b=a*2
+&gt;&gt;&gt; print b
+10
+&gt;&gt;&gt; b='hello'
+&gt;&gt;&gt; print b,'world'
+hello world
+&gt;&gt;&gt; # Python ist sehr mächtig bzgl. Sequenzen
+&gt;&gt;&gt; a=(1,2,3) # definiert ein Tuple (nicht änderbar!)
+&gt;&gt;&gt; print a
+(1, 2, 3)
+&gt;&gt;&gt; a[1]=2  # dies geht schief
+Traceback (most recent call last):
+  File "&lt;stdin&gt;", line 1, in ?
+TypeError: object doesn't support item assignment
+&gt;&gt;&gt; a=[1,2,3] # definiert eine Liste (änderbar)
+&gt;&gt;&gt; a[1]=7
+&gt;&gt;&gt; print a
+[1, 7, 3]
+&gt;&gt;&gt; # Kontrollstrukturen
+&gt;&gt;&gt; if (b=='hello'):
+...     print "b is hello"
+... else:
+...     print "????"
+...
+b is hello
+&gt;&gt;&gt; # das for-Statement kann über Sequenzen iterieren
+&gt;&gt;&gt; for i in a:
+...     print i
+...
+1
+7
+3
+&gt;&gt;&gt; # ersetze Positionen 1 bis 3 (ohne 3) mit 0
+&gt;&gt;&gt; a[1:3]=[0]
+&gt;&gt;&gt; a
+[1, 0]
+&gt;&gt;&gt; # a[-i] ist das i-te Element von hinten gezählt
+&gt;&gt;&gt; a[-1]=7; a[-2]=8
+&gt;&gt;&gt; a
+[8, 7]</screen>
+
+		</sect2>
+		<sect2 id="py_blocks"><title>Blöcke, Funktionen und Exceptions</title>
+			<para>Blöcke werden nur durch Einrückung gebildet. Kein <literal>begin</literal>,
+			<literal>end</literal>, Klammern (<literal>{</literal>, <literal>}</literal>)
+			oder ähnliches ist nötig. Dies sieht auf den ersten Blick etwas unbequem aus, aber es ist 
+			wirklich nett - Sie müssen Ihren Code immer so strukturieren, wie er
+            <emphasis>gemeint</emphasis> ist:</para>
+
+			<screen>&gt;&gt;&gt; for i in [1,2,3]:
+...     print 2*i
+...
+2
+4
+6
+&gt;&gt;&gt; i=0
+&gt;&gt;&gt; while (i!=3):
+...     print i
+...     i+=1
+...
+0
+1
+2</screen>
+
+			<para>Schauen wir uns nun an, wie Funktionen definiert werden und wie man mit
+			Exceptions arbeitet:</para>
+
+			<screen>&gt;&gt;&gt; def double_it(a):
+...     return (2*a)
+...
+&gt;&gt;&gt; print double_it(9)
+18
+&gt;&gt;&gt; print double_it("hello")
+hellohello
+&gt;&gt;&gt;
+&gt;&gt;&gt; # wir lösen eine Exception aus
+&gt;&gt;&gt; a=1/0
+Traceback (most recent call last):
+  File "&lt;stdin&gt;", line 1, in ?
+ZeroDivisionError: integer division or modulo by zero
+&gt;&gt;&gt;
+&gt;&gt;&gt; # jetzt reagieren wir darauf
+&gt;&gt;&gt; try:
+...     a=1/0
+... except ZeroDivisionError,e:
+...     print "You divided by zero, message was:",e
+...
+You divided by zero, message was: integer division or modulo by zero</screen>
+		</sect2>
+		<sect2 id="py_modules"><title>Mit Modulen arbeiten</title>
+			<para>Module sind eine Möglichkeit, Funktionen zusammen zu packen. Sie müssen importiert
+			werden, bevor Sie sie benutzen können und sie stellen Ihnen ein neues Objekt zur Verfügung, das
+			alle Funktionen enthält. Lassen Sie uns mit einigen etwas herumspielen:
+			</para>
+
+			<screen>&gt;&gt;&gt; import time
+&gt;&gt;&gt; # was ist in time?
+&gt;&gt;&gt; dir(time)
+['__doc__', '__file__', '__name__', 'accept2dyear', ...]
+&gt;&gt;&gt; # Was machen all diese Funktionen? Python sagt es uns...
+&gt;&gt;&gt; print time.__doc__
+This module provides various functions to manipulate time values.
+
+[...]
+
+Variables:
+
+[...]
+
+Functions:
+
+time() -- return current time in seconds since the Epoch as a float
+ctime() -- convert time in seconds to string
+[...]
+
+&gt;&gt;&gt; # Kannst du mir ctime bitte etwas genauer erklären?
+&gt;&gt;&gt; print time.ctime.__doc__
+ctime(seconds) -> string
+
+Convert a time in seconds since the Epoch to a string in local time.
+This is equivalent to asctime(localtime(seconds)). When the time tuple
+is not present, current time as returned by localtime() is used.
+
+&gt;&gt;&gt; time.time()
+1044380131.186987
+&gt;&gt;&gt; time.ctime()
+'Tue Feb  4 18:35:36 2003'
+&gt;&gt;&gt; import os
+&gt;&gt;&gt; os.getuid()
+500
+&gt;&gt;&gt; import pwd
+&gt;&gt;&gt; pwd.getpwuid(500)
+('hans', 'x', 500, 100, 'Hans Meier', '/home/gernot', '/bin/bash')</screen>
+
+			<para>Ok, ich hoffe, Sie haben einen kleinen Eindruck von Python bekommen. Viel Spaß damit.
+			Ich hatte ihn... :-)</para>
+
+			<para>Wenn Sie weitere Fragen haben, würde ich Ihnen <emphasis>wirklich</emphasis>
+            empfehlen, mit einem guten Buch oder der Dokumentation auf
+			<ulink url="http://www.python.org"/> weiter zu machen. Bitte stellen Sie keine allgemeinen
+            Python-Fragen auf den &cs;-Listen...</para>
+
+		</sect2>
+	</sect1>
+	<sect1 id="ug_writing_scripts"><title>Ein erster Blick auf das Incoming- und Idle-Skript</title>
+		<para>Im <xref linkend="howwork"/> sagte ich schon, dass zwei Typen von Skripten in
+		&cs; genutzt werden. Schauen wir sie uns jetzt mal genauer an.</para>
+
+		<sect2 id="ug_scripts_incoming"><title>Das Incoming-Skript</title>
+			<para>Immer, wenn ein Anruf von &cs; empfangen wird, wird das Incoming-Skript aufgerufen -
+			um genau zu sein, es wird eine Funktion namens <literal>callIncoming</literal> in einem
+			Python-Skript irgendwo auf Ihrer Festplatte aufgerufen. Dieses "irgendwo" wurde im
+			<xref linkend="configcs"/> definiert, erinnern Sie sich?</para>
+
+			<para>Das Skript muss also immer eine Funktion mit folgender Signatur definieren:</para>
+
+			<programlisting>def callIncoming(call,service,call_from,call_to):
+	# Funktionsrumpf
+	...</programlisting>
+
+			<para>Die von &cs; übergebenen Parameter sind:</para>
+
+			<variablelist>
+				<varlistentry>
+					<term>call</term>
+					<listitem><para>Referenz auf den eingehenden Anruf. Diese wird später in allen
+					&cs;-Funktionen, die Sie aufrufen, dazu genutzt, dem System mitzuteilen, welcher Anruf
+					gemeint ist. Sie werden diesen Parameter nur an andere Funktionen weitergeben - das
+					Skript kann nichts damit anfangen (er ist
+					<emphasis>unsichtbar</emphasis>).</para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term>service (Integer)</term>
+					<listitem><para>Service des eingehenden Anrufs wie er vom ISDN signalisiert wird.
+					Folgende Werte sind möglich:
+					<itemizedlist>
+						<listitem><para><literal>SERVICE_VOICE</literal>: Sprach-Anruf</para></listitem>
+						<listitem><para><literal>SERVICE_FAXG3</literal>: analoger Fax-Anruf</para></listitem>
+						<listitem><para><literal>SERVICE_OTHER</literal>: anderer Service, der oben nicht gelistet ist</para></listitem>
+					</itemizedlist>
+					</para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term>call_from (String)</term>
+					<listitem><para>Die Nummer des Anrufers (Quelle des Anrufs) als Python-String</para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term>call_to (String)</term>
+					<listitem><para>Die angerufene Nummer (Ziel des Anrufs) als Python-String</para></listitem>
+				</varlistentry>
+			</variablelist>
+
+			<para>Die erste Aufgabe der Funktion sollte es sein, zu entscheiden, ob sie den Anruf annehmen
+            oder ablehnen möchte. Wenn sie ihn annimmt, wird sie normalerweise etwas damit machen
+            (ein Fax empfangen, einen Sprach-Anruf aufnehmen, eine nette Ansage abspielen, ...) und die
+            Verbindung dann beenden. Nachdem alle erforderliche Arbeit getan ist, sollte sie sich sofort
+			beenden. In einem späteren Kapitel werde ich Ihnen ein paar Beispiele zeigen, um das etwas zu
+			verdeutlichen.</para>
+
+			<para>Natürlich können Sie Ihre Anwendung in mehrere Funktionen und vielleicht mehrere Skripte
+			aufteilen, die aufgerufen und/oder rekursiv importiert werden - aber der Startpunkt ist immer
+			das <emphasis>Incoming-Skript</emphasis>, das <literal>callIncoming</literal> 
+            enthält. Wenn Python und &cs; richtig installiert sind, sollten Sie auch Python-Module
+            importieren und benutzen können.</para>
+
+		</sect2>
+
+		<sect2 id="ug_scripts_idle"><title>Das Idle-Skript</title>
+			<para>Während das Incoming-Skript nur gestartet wird, wenn ein Anruf herein kommt, brauchen wir
+			einen anderen Mechanismus, um einen ausgehenden Anruf auszulösen. Da &cs; nicht wissen kann,
+			wann Sie dies beabsichtigen, ruft es in regelmäßigen Abständen eine Funktion namens
+            <literal>idle</literal> im sog. "Idle-Skript" auf. Wie die Abstände konfiguriert werden
+			und wo sich das Skript befindent, finden Sie unter <xref linkend="configcs"/>.</para>
+
+			<para>Die aufgerufene Funktion muss folgende Signatur haben:</para>
+
+			<programlisting>def idle(capi):
+	# Funktionsrumpf
+	...</programlisting>
+
+			<para>Der einzige von &cs; übergebene Parameter ist:</para>
+
+			<variablelist>
+				<varlistentry>
+					<term>capi</term>
+					<listitem><para>Dies ist eine Referenz auf eine interne Klasse von &cs;,
+					die die Kommunikation mit der CAPI-Schnittstelle abwickelt. Sie müssen diesen Parameter
+					an einige &cs;-Funktionen übergeben. Sie können darüber hinaus in Ihrem Skript nichts
+					sinnvolles damit anfangen. Dieser Parameter ist nur zum internen Gebrauch und wird
+					möglicherweise (hoffentlich) irgendwann entfernt werden. Bis dahin übergeben Sie ihn
+					einfach, wo es erforderlich ist.</para></listitem>
+				</varlistentry>
+			</variablelist>
+
+			<para>Jezt können Sie in dieser Funktion machen, was Sie wollen. Wahrscheinlich werden Sie in
+			einem E-Mail-Account nach einem Auftrag sehen, nach einer zu sendenden Datei in einem speziellen
+			Verzeichnis oder ähnliches und einen Anruf tätigen, um den Auftrag an den richtigen Empfänger
+            zu schicken.</para>
+
+			<para>Theoretisch könnten Sie auch jede andere periodische Aufgabe auf Ihrem System mit dem
+			Idle-Skript erledigen - aber wir sollten solche allgemeinen Dinge lieber Anwendungen überlassen,
+			die für solche Sachen entwickelt wurden wie z.B. <application>cron</application>. ;-)
+            </para>
+
+			<para>Wie oben erwähnt, kann <literal>idle</literal> andere Funktionen oder Skripte
+			aufrufen, wenn Sie wollen, und alle Python-Module können importiert werden.</para>
+		</sect2>
+	</sect1>
+
+	<sect1 id="fileformats"><title>Verwendete Dateiformate</title>
+		<para>Bevor wir mit dem Schreiben von Skripten weiter machen, lassen Sie mich Ihnen bitte einige
+		Worte zu den Dateiformaten sagen, die der &cs;-Kern verwendet.</para>
+
+		<para>&cs; liest und schreibt Dateien immer im dem Format, das die CAPI-ISDN-Treiber erwarten bzw.
+		übergeben. Deshalb muss nicht alles in oder aus anderen Formaten konvertiert werden, wodurch 
+		unnötiger Overhead vermieden wird.</para>
+
+		<para>Da diese Formate nicht so bekannt sind und Sie spezielle Tools für die Konvertierung oder
+		zum Anschauen/Abspielen brauchen, gebe ich Ihnen einen kurzen überblick, wie das geht.</para>
+
+		<para>Wahrscheinlich werden Ihre Skripte die speziellen ISDN-Dateiformate in bekannte Formate
+		konvertieren, um sie z.B. per E-Mail an Sie zu verschicken. Trotzdem empfehle ich Ihnen, die
+		empfangenen und gesendeten Dateien irgendwo im &cs;-eigenen Format zu speichern. Dies schützt Sie
+		vor Datenverlust, wenn die Konvertierung schief geht und hilft Ihnen beim debuggen Ihrer Skripte.
+        </para>
+
+		<para>Alle Tools, die hier erwähnt werden, sind im <xref linkend="require_soft"/> beschrieben.
+        Dort finden Sie Informationen, wo Sie diese bekommen.</para>
+
+		<sect2 id="voice_fileformat"><title>Format der Sprach-Dateien (invertiert A-Law, 8kHz, mono)</title>
+			<para>ISDN überträgt Sprach-Daten als Wave-Dateien mit einer Sample-Rate von 8kHz in Mono. Um
+			Bandbreite zu sparen, wird eine Kompression namens A-Law verwendet (zumindest in Europa, andere
+			Länder wie die USA verwenden u-Law, das A-Law sehr ähnlich ist). Aus irgendeinem Grund, den ich
+			nicht verstehe, verwenden sie eine Form von A-Law mit umgedrehter Bitfolge namens
+			"invertiert A-Law".</para>
+
+			<sect3 id="creating_alaw"><title>Erzeugen von A-Law-Dateien</title>
+
+				<para>Es gibt zwei Möglichkeiten, A-Law-Dateien zu erzeugen.</para>
+
+				<para>Die erste ist, Ihren Computer mit Ihrem Telefon anzurufen (verwenden Sie entweder
+				das Standard-Anrufbeantworter-Skript und konfigurieren Sie es wie im
+                <xref linkend="answering_machine.conf"/> beschrieben oder schreiben Sie selbst ein
+                einfaches Skript). Sie können dann alles aufnehmen, was Sie wollen. Danach können Sie die
+				Datei nehmen (wenn Sie die Standard-Skripte verwenden, nehmen Sie bitte die Datei aus dem
+				user_dir, nicht den Anhang der Mail, da dieser bereits konvertiert wurde) und verwenden.
+                </para>
+
+				<para>Eventuell möchten Sie die aufgenommene Datei kürzen und unerwünschte Geräusche
+				und Stille am Anfang und am Ende entfernen. Dies kann einfach mit 
+				<command>sox</command> und <command>play</command> erledigt werden (beide
+			    befinden sich im <command>sox</command>-Paket).</para>
+
+				<para>Mit <command>sox</command> kann man eine Datei konvertieren, während man sie mit
+                <command>play</command> nur abspielen kann. Beide unterstützen die selben Effekte, 
+                einschließlich der Trim-Option. Beide erkennen auch, welchen Dateityp sie verwenden, indem
+                Sie sich den Dateinamenerweiterung Ihrer Datei ansehen. Alle Ihre invertierten A-Law-Dateien
+                sollten daher in der Form <filename>something.la</filename> benannt sein
+                (<filename>.la</filename> ist die umgekehrte From von
+				<filename>.al</filename>, was für A-Law steht).</para>
+
+				<para>Lassen Sie uns also zuerst die optimalen Werte für den Trim-Effekt herausfinden,
+                indem wir <command>play</command> aufrufen:</para>
+
+				<screen><command>play myfile.la trim &lt;Start-Offset&gt; &lt;Dauer&gt;</command></screen>
+
+				<para>Spielen Sie nun ein bisschen mit dem Start-Offset und der Dauer (beide angegeben in
+				Sekunden), bis Sie die richtigen Werte haben. Wenn Sie sie gefunden haben, können Sie
+                <command>sox</command> verwenden, um die benötigte Datei zu erzeugen:</para>
+
+				<screen><command>sox myfile.la outfile.la trim &lt;Start-Offset&gt; &lt;Dauer&gt;</command></screen>
+
+				<para>Sie erhalten dann eine Datei namens <filename>outfile.la</filename>, die jetzt
+				enthalten sollte, was Sie wollen.</para>
+
+				<para>Die zweite Möglichkeit, eine invertierte A-Law-Datei zu erzeugen, ist, eine normale 
+				WAV-Datei mit Ihrem Lieblings-Sound-Tool aufzunehmen und sie mit <command>sox</command>
+				in das Zielformat zu konvertieren. Sie erzielen die besten Ergebnisse, wenn Ihre WAV-Dateien
+				bereits das Format 8kHz, Mono, 16 Bit haben. <command>sox</command> kann auch andere
+				WAV-Dateien wenn nötig konvertieren, aber dies resultiert normalerweise in einer schlechteren
+				Qualität. Empfehlenswert ist auch, die Aufnahme auf maximal 50% der maximalen Amplitude
+				zu normalisieren.</para>
+
+				<para>Sie können WAV mit folgendem Kommando in invertiertes A-Law konvertieren (danke an Carsten Heesch für den Tipp):</para>
+
+				<screen><command>sox myfile.wav -r 8000 -c 1 -b outfile.la resample -ql</command></screen>
+
+                                <para>Wenn Sie fr&uuml;her vbox benutzt haben und nun Ihre alten Audio-Files konvertieren
+				wollen, k&ouml;nnen Sie auch das folgende Kommando benutzen:</para>
+
+                                <screen><command>vboxtoau &lt; infile.msg | sox -tau - outfile.la</command></screen>
+
+			</sect3>
+			<sect3 id="playing_alaw"><title>Abspielen von A-Law-Dateien</title>
+				<para>Auch hier gibt es wieder zwei Möglichkeiten. Der <command>play</command>-Befehl
+				von <command>sox</command> kann das invertiete A-Law-Format ohne Konvertierung 
+				abspielen. Rufen Sie einfach <command>play</command> mit dem Dateinamen als Parameter
+                auf:</para>
+
+				<screen><command>play myfile.la</command></screen>
+
+				<para>Sie können aber auch <command>sox</command> verwenden, um die A-Law-Dateien
+				in das gebräuchlichere WAV-Format zu konvertieren, indem die aufrufen:</para>
+
+				<screen><command>sox myfile.la -w outfile.wav</command></screen>
+
+				<para>Die erzeugte Datei <filename>outfile.wav</filename> kann mit fast jedem
+				Audio-Player problemlos abgespielt werden.</para>
+			</sect3>
+		</sect2>
+		<sect2 id="fax_fileformat"><title>Format von Fax-Dateien (Structured Fax Files)</title>
+			<para>CAPI-konforme Treiber erwarten und übergeben Fax-Dateien als sog.
+			Structured Fax File (SFF). Da dies ein CAPI-spezifisches Format zu sein scheint, gibt es nicht
+			sehr viele Tools für GNU/Linux, die es verarbeiten können. Ich habe schließlich
+			einige kleine Tools gefunden, die Peter Schäfer geschrieben hat und die wir hier verwenden
+			werden.</para>
+
+			<para>&cs; kann auch Farbfaxe empfangen, welche in einem speziellen Dateiformat abgelegt
+			werden, das ich CFF genannt habe.</para>
+
+			<sect3 id="create_sff"><title>Erzeugen eines SFF</title>
+				<para>In aktuellen Ghostscript-Versionen gibt es einen Patch von Peter, um SF-Dateien zu
+				erstellen. Um zu prüfen, ob Ihr Ghostscript das schon unterstützt,
+				geben Sie <command>gs --help</command> ein und suchen nach dem sog.
+				<command>cfax</command>-Device in der langen Device-Liste, die angezeigt wird.
+				Wenn es nicht aufgelistet ist, müssen Sie einen neueren Ghostscript verwenden oder Ihn
+				neu übersetzen, sorry. Ich kenne keine andere Möglichkeit, momentan SFF zu erzeugen.</para>
+
+				<para>Sie brauchen erstmal eine PostScript-Datei (wie sie von fast jedem Linux-Programm
+				erstellt wird, wenn Sie "in Datei drucken" auswählen). Jetzt können Sie GhostScript aufrufen,
+				um sie in ein SFF zu konvertieren:</para>
+
+				<screen><command>gs -dNOPAUSE -dBATCH -sDEVICE=cfax -sOutputFile=outfile.sff file.ps</command></screen>
+
+				<para>Wenn Sie sich nicht sicher sind, ob es funktioniert hat, können Sie
+                <command>sffview</command> wie weiter unten beschrieben verwenden.</para>
+			</sect3>
+			<sect3 id="view_sff"><title>Ansehen / konvertieren von SFF</title>
+				<para>Um einfach ein empfangenes SFF anzusehen, können Sie das
+                <command>sffview</command>-Programm verwenden. Dies ist ein einfaches, aber sehr
+                nützliches Tool zum Ansehen von SF-Dateien, ohne sie konvertieren zu müssen.
+				Starten Sie es einfach und Sie bekommen ein GUI, wo Sie die gewünschte Datei öffnen können.
+                </para>
+
+				<para>Wenn Sie eine Fax-Datei in ein gebräuchlicheres Format konvertieren möchten,
+                empfehle ich <command>sfftobmp</command>. Es unterstützt einige Ausgabe-Formate wie
+				JPEG, TIFF, PBM oder BMP. Ich bevorzuge mehrseitige TIFF-Dateien, da dies das einzige
+				Format ist, das in der Lage ist, mehrere Seiten in einer Datei zu speichern. Um SFF in ein
+				mehrseitiges TIFF zu konvertieren, rufen Sie auf:</para>
+
+				<screen><command>sfftobmp -tif myfile.sff outfile.tiff</command></screen>
+
+				<para>Sie erhalten eine TIFF-Datei, die Sie mit den TIFF-Tools (z.B.
+                <command>tiff2pdf</command>) in nahezu jedes andere nützliche Format
+				konvertieren können.
+				</para>
+			</sect3>
+			<sect3 id="cff"><title>Farbfaxe - das CFF-Format</title>
+				<para>Es gibt eine Erweiterung zum Fax-Standard, die die Übertragung von farbigen
+				Dokumenten erlaubt. Sie wird nur selten benutzt, aber da einige User sie trotzdem
+				benötigten, habe ich den Empfang solcher Dokumente mittlerweile in &cs; realisiert.
+				</para>
+
+				<para>Das CFF-Format (ich weiß nicht sicher, ob das ein offizieller Name für das Format ist)
+				besteht prinzipiell aus einem oder mehreren zusammengehängten JPEG-Bildern. Die meisten
+				Programme, die JPEG-Dateien öffnen können, sollten zumindest in der Lage sein, die erste
+				Seite eines solchen Dokuments anzuzeigen. Mit meinem Patch, der in <xref linkend="require_soft"/>
+				beschrieben ist, ist das Tool jpeg2ps in der Lage, CFF in PostScript zu konvertieren, so dass
+				Sie alle Seiten mit einem normalen PostScript-Betrachter ansehen können.</para>
+
+				<para>Leider kenne ich momentan keinen Weg, dieses Format manuell zu erzeugen.
+				Daher unterstützt &cs; bis jetzt nur den Empfang solcher Dokumente. Wenn Sie
+				ein solches Tool kennen oder realisieren wollen, kontaktieren Sie mich bitte!</para>
+			</sect3>
+		</sect2>
+	</sect1>
+
+	<sect1 id="incoming_tutorial"><title>Tutorial: Ein Incoming-Skript schreiben</title>
+		<para>In diesem Abschnitt werde ich Ihnen Schritt für Schritt zeigen, wie Sie Ihr eigenes
+        Incoming-Skript schreiben können. Wir fangen an, indem wir einfach jeden eingehenden Anruf annehmen
+        und einen Piep abspielen. Das letzte Beispiel ist ein sehr einfacher, aber nützlicher 
+        Anrufbeantworter mit Fax-Erkennung und -Empfang.</para>
+
+		<sect2 id="incoming_tut_basics"><title>Grundlagen und ein wirklich dummer Anrufbeantworter</title>
+			<para>Lassen Sie uns mit einem sehr einfachen Fall anfangen: wir nehmen alle eingehenden
+            Anrufe an, piepen und nehmen etwas auf, sodass wir eine Audio-Datei haben, mir der wir später 
+			ein bisschen rumspielen können. Legen Sie zuerst irgendwo ein neues Verzeichnis an, für das
+			<literal>root</literal> Schreibrechte haben muss. Wir brauchen auch eine Test-Audio-Datei,
+			um sie zu verschicken. Lassen Sie uns den Piep nehmen, der mit &cs; geliefert wird.</para>
+
+			<screen>mkdir capisuite-examples
+chmod 777 capisuite-examples # schreibbar für alle
+cd capisuite-examples
+cp /usr/local/share/capisuite/beep.la .</screen>
+
+			<para>Vielleicht müssen Sie den Pfad in der letzten Zeile anpassen, damit er zu Ihrer
+            Installation passt.</para>
+
+			<para>Kopieren Sie das hier gezeigte Beispiel jetzt in eine Datei namens
+				<filename>example.py</filename> in diesem Verzeichnis. Vergessen Sie nicht, den Pfad
+				<literal>my_path</literal> zu ändern.</para>
+
+			<example><title>example.py</title>
+			<programlisting>import capisuite<co id="incoming_ex1_1"/>
+
+my_path="/path/to/the/just/created/capisuite-examples/"<co id="incoming_ex1_2"/>
+
+def callIncoming(call,service,call_from,call_to):<co id="incoming_ex1_3"/>
+	capisuite.connect_voice(call,10)<co id="incoming_ex1_4"/>
+	capisuite.audio_send(call,my_path+"beep.la")<co id="incoming_ex1_5"/>
+	capisuite.audio_receive(call,my_path+"recorded.la",20,3)<co id="incoming_ex1_6"/>
+	capisuite.disconnect(call)<co id="incoming_ex1_7"/></programlisting></example>
+
+			<para>Lassen Sie uns das Skript Zeile für Zeile durchgehen:</para>
+
+			<calloutlist>
+				<callout arearefs="incoming_ex1_1">
+					<para>Das capisuite-Modul, das alle &cs;-spezifischen Funktionen enthält, wird 
+                    importiert.	Alle &cs;-Objekte (Funktionen, Konstanten) in diesem Modul können nun über
+					<literal>capisuite.objectname</literal> angesprochen werden. Sie können auch ein
+					"<literal>from capisuite import *</literal>" machen, das alle Objekte in den 
+					aktuellen Namespace einfügt - aber dies wird nicht empfohlen, da sie mit anderen
+					globalen Objekten kollidieren können.</para>
+
+					<note><para>Das importierte Modul <literal>capisuite</literal> ist nicht als
+					extra Modul verfügbar, sodass Sie dies nicht in einer interaktiven Python-Session tun
+                    können. Es wird in das &cs;-Binary eingebunden und ist nur in Skripten, die von &cs;
+                    interpretiert werden, verfügbar.</para></note>
+				</callout>
+				<callout arearefs="incoming_ex1_2">
+					<para>ändern Sie dies bitte auf den echten Pfad, aus dem Sie diese Beispiele aufrufen.
+                    </para>
+				</callout>
+				<callout arearefs="incoming_ex1_3">
+					<para>Defininieren Sie die erforderliche Funktion wie im
+					<xref linkend="ug_scripts_incoming"/> beschrieben.</para>
+				</callout>
+				<callout arearefs="incoming_ex1_4">
+					<para>Dies ist die erste &cs;-Funktion, die wir verwenden: Sie nimmt den wartenden
+                    Anruf an. Der erste Parameter teilt &cs; mit, welchen Anruf Sie meinen. Dieser Parameter
+                    ist für fast alle &cs;-Funktionen erforderlich. Ok, wir haben jetzt nur einen Anruf - 
+                    aber stellen Sie sich ein Incoming-Skript vor, das zur selben Zeit auch noch einen
+					ausgehenden Anruf tätigen will (zum Beispiel, um einen Anruf weiterzuleiten). In diesem
+                    Fall wüßte &cs;, welchen Anruf Sie meinen - deshalb müssen Sie die übergebene Referenz
+                    an alle Funktionen weiterreichen, die mit der Verbindung zu tun haben.</para>
+
+					<para>Sie können &cs; auch sagen, dass es eine bestimmte Zeit warten soll, bevor es
+                    einen Anruf annehmen soll - dafür wird der zweite Parameter benutzt. Diese Skript wartet
+					also 10 Sekunden bevor die Verbindung zum Anrufer hergestellt wird. Glauben Sie nicht,
+					dass dieser Paramter überflüssig ist und dass Sie stattdessen eine Python-Funktion (z.B.
+                    <literal>time.sleep()</literal>) aufrufen können, um zu warten. Dies wird für 
+                    Verzögerungen länger als 4 (oder 8, hängt von Ihrem ISDN-Setup ab) Sekunden nicht
+                    funktionieren, da der Anruf abgewiesen wird, wenn er nicht von einem ISDN-Device
+					"vor-angenommen" wird, indem Ihrem Netz-Provider mitgeteilt wird, dass es klingelt. &cs;
+					macht das, wenn nötig - nutzen Sie also bitte diesen Parameter.</para>
+				</callout>
+				<callout arearefs="incoming_ex1_5">
+					<para>Dieser Aufruf sollte ziemlich selbsterklärend sein. Er sendet die Audio-Datei,
+					die unter <filename>beep.la</filename> gespeichert ist.</para>
+				</callout>
+				<callout arearefs="incoming_ex1_6">
+					<para>Nimmt eine Audio-Datei von maximal 20 Sekunden auf - es wird eher aufgehört,
+					wenn mehr als 3 Sekunden Stille erkannt werden.</para>
+				</callout>
+				<callout arearefs="incoming_ex1_7">
+					<para>Last, but not least - wird die Verbindung beendet. Auflegen. Fertig. Es ist 
+                    vorbei.</para>
+				</callout>
+			</calloutlist>
+
+			<para>Die &cs;-Konfiguration muss geändert werden, um das gerade erstellte Skript nutzen zu 
+			können. Editieren Sie dazu Ihre <filename>capisuite.conf</filename> und ersetzen Sie den
+			<literal>incoming_script</literal>-Wert durch den Pfad zur Datei, die Sie gerade erstellt
+			haben (siehe <xref linkend="configcs"/>) und starten Sie &cs; neu.</para>
+
+			<para>Probieren Sie's mal aus: Rufen Sie irgendeine Nummer Ihrer ISDN-Karte  an - wenn sie
+			am ISDN-Anschluss hängt, geht jede Nummer (MSN) - wenn sie an einer Telefonanlage hängt, müssen
+			Sie eine Nummer wählen, die in der Anlage für die Karte konfiguriert ist.</para>
+
+			<para>Sie sollten einen Piep hören und dann können Sie etwas auf diesen primitiven
+		    Anrufbeantworter sprechen. Legen Sie bitte nicht auf, bevor das Skript dies macht, da dieser
+            Fall noch nicht behandelt wird. Warten Sie einfach 3 Sekunden, nachdem Sie etwas gesagt haben -
+            es sollte die Verbindung nach dieser Stille-Periode trennen.</para>
+
+			<para>Wenn das nicht funktioniert, haben Sie vielleicht einen Fehler beim Kopieren des Skripts
+            gemacht. In diesem Fall können Sie sich das Log und Error-Log von &cs; anschauen. Sie finden
+			dies unter <filename>/var/log/capisuite</filename> oder 
+            <filename>/usr/local/var/log/capisuite</filename>, wenn Sie den Pfad nicht geändert haben.
+			</para>
+
+			<para>Ein guter Trick, um auf Syntaxfehler zu prüfen, ist, Ihre Skripte durch den normalen
+			Python-Interpreter laufen zu lassen. Rufen Sie dazu
+            <command>python /path/to/your/example.py</command> auf. Natürlich wird er sich über das 
+            <literal>import capisuite</literal> beschweren, da dies kein Standard-Python-Modul ist. 
+            Aber bevor er dies macht, prüft er die Syntax Ihres Skripts - wenn Sie also irgendeinen
+			<emphasis>anderen</emphasis> Fehler bekommen, beheben Sie ihn und probieren Sie es
+            nochmal. Wenn Sie nur
+
+			<screen>Traceback (most recent call last):
+  File "../scripts/incoming.py", line 16, in ?
+    import capisuite,cs_helpers
+ImportError: No module named capisuite</screen>
+
+			bekommen, hat Ihr Skript die korrekte Syntax.</para>
+
+			<para>Ich hoffe, Sie haben Ihr Skript jetzt zum Laufen bekommen - wenn nicht, zögern Sie nicht,
+			auf der &cs;-Mailingliste zu fragen, <emphasis>wenn</emphasis> Sie zuvor ein
+            Python-Tutorial gelesen haben.</para>
+
+			<para>Im nächsten Abschnitt werden wir eine Ansage verwenden. Nehmen Sie also einge Worte mit
+			diesem einfachen Skript auf und verschieben Sie die erzeugte Datei
+            <filename>recorded.la</filename> nach <filename>announce.la</filename>.</para>
+		</sect2>
+		<sect2 id="incoming_tut_improving"><title>Verbesserungen in eine brauchbaren (?) Zustand</title>
+			<para>Gut, es ist wirklich nicht so schön, dass der Anrufer nicht auflegen darf - und es ist
+			schlecht, dass wir alle eingehenden Anrufe annehmen - dadurch nehmen wir vielleicht der Mutter
+			ihre wichtigen Anrufe weg.</para>
+
+			<para>Lassen Sie uns das schnell verbessern.</para>
+
+			<example><title>example.py, verbessert</title>
+			<programlisting>import capisuite
+
+my_path="/path/to/the/just/created/capisuite-examples/"
+
+def callIncoming(call,service,call_from,call_to):
+	try:<co id="incoming_ex2_1"/>
+		if (call_to=="123"):<co id="incoming_ex2_2"/>
+			capisuite.connect_voice(call,10)
+			capisuite.audio_send(call,my_path+"announce.la")<co id="incoming_ex2_2a"/>
+			capisuite.audio_send(call,my_path+"beep.la")
+			capisuite.audio_receive(call,my_path+"recorded.la",20,3)
+			capisuite.disconnect(call)
+		else:
+			capisuite.reject(call,1)<co id="incoming_ex2_3"/>
+			capisuite.disconnect(call)<co id="incoming_ex2_3a"/>
+	except capisuite.CallGoneError:
+		capisuite.disconnect(call)<co id="incoming_ex2_4"/></programlisting></example>
+
+			<calloutlist>
+				<callout arearefs="incoming_ex2_1">
+					<para>Wenn die Gegenstelle unerwartet auflegt, löst &cs; die Exception
+					<literal>CallGoneError</literal> aus. Sie sollten deshalb Ihren Code
+					immer in ein <literal>try</literal>-Statement einfassen und die ausgelöste
+					Exception am Ende Ihres Skripts (oder früher, wenn nötig) behandeln.
+					Diese Exception kann durch jedes &cs;-Kommando, das eine bestehende
+					Verbindung erwartet, (wie audio_send()) ausgelöst werden. Seit &cs; 0.5
+					wird sie nicht mehr beim normalen Verbindungsabbau ausgelöst - also
+					zum Beispiel wenn die Gegenstelle <emphasis>während</emphasis>
+					audio_receive() auflegt. In diesem Fall endet die entsprechende Funktion
+					einfach normal. Die Exception wird erst beim Aufruf der
+					<emphasis>nächsten</emphasis> &cs;-Funktion ausgelöst. Der Grund für
+					diese Änderung war, eine Exception wirklich nur im Fehlerfall auszulösen
+					und ansonsten den normalen Ablauf im Skript nicht zu verlassen. Für
+					die meisten Skripte sollte diese Änderung allerdins unerheblich sein.</para>
+				</callout>
+				<callout arearefs="incoming_ex2_2">
+					<para>Wir schauen uns die angerufene Nummer an (ersetzen Sie bitte
+                    <literal>123</literal>	durch die Nummer, die &cs; akzeptieren soll)...</para>
+				</callout>
+				<callout arearefs="incoming_ex2_2a">
+					<para>Die Ansage, die wir im letzten Abschnitt aufgenommen haben, wird abgespielt. 
+                    Wenn Sie das nicht möchten, nehmen Sie einfach eine neue auf und verschieben Sie die
+					Datei <filename>recorded.la</filename> wieder nach
+					<filename>announce.la</filename>.</para>
+				</callout>
+				<callout arearefs="incoming_ex2_3">
+					<para>Der Anruf wird ignoriert. Der zweite Parameter teilt den genauen Grund für die
+                    Ablehnung mit - Sie können den Anruf ignorieren (jedes andere ISDN-Device oder Telefon
+					klingelt für diese Nummer weiter), indem Sie <literal>1</literal> angeben,
+                    aktiv die Verbindung beenden, indem Sie <literal>2</literal> angeben, oder
+                    irgend einen Fehler-Code, der in der ISDN-Spezifikation enthalten ist 
+                    (siehe <xref linkend="capicodes_isdn"/> für die verfügbaren Codes).</para>
+				</callout>
+				<callout arearefs="incoming_ex2_3a">
+					<para>Sie müssen immer am Ende Ihres Skripts <literal>disconnect</literal>
+					aufrufen, da dieses immer auf das Ende des Anrufs wartet, während 
+                    <literal>reject</literal> nur die Ablehnung des Anrufs auslöst. Andernfalls 
+                    erhalten Sie eine Warning im Error-Log.</para>
+				</callout>
+				<callout arearefs="incoming_ex2_4">
+					<para>Dies ist der Exception-Handler für <literal>CallGoneError</literal> - die
+					Exception, die  &cs; auslöst, wenn der Anruf vom anderen Gespächspartner
+					unerwartet beendet wird. Sie sollten hier auch <literal>disconnect</literal>
+					aufrufen, um zu warten bis der Anruf vollständig beendet wurde.</para>
+				</callout>
+			</calloutlist>
+
+			<para>Speichern Sie dies wieder als <filename>example.py</filename> und probieren Sie es
+            aus. Es ist nicht erforderlich, &cs; neu zu starten, da alle Skripte jedesmal, wenn sie
+			ausgeführt werden, neu gelesen werden. Jetzt dürfen Sie auch auflegen ;-).
+			</para>
+
+
+		</sect2>
+		<sect2 id="incoming_tut_unique_names"><title>Verwendung vernünftiger Dateinamen</title>
+			<para>Wir haben immer den selben Namen verwendet, um die aufgenommene Nachricht zu speichen,
+            was natürlich nicht sinnvoll ist. Wir sollten wirklich für jeden neuen Anruf einen neuen Namen 
+            wählen. Dies ist nicht so einfach, wie es sich anhört - sie müssen sicherstellen, dass der
+            verwendete Algorithmus auch noch mit mehreren Anrufen, die zur selben Zeit ankommen, 
+            funktioniert. Glücklicherweise hatte der hilfsbereite Programmierer von &cs; das selbe Problem,
+            sodass wir seinen (hmmm... meinen?) Code verwenden könenn.</para>
+
+			<para>Das Python-Modul <filename>cs_helpers.py</filename> enthält einige hilfreiche 
+            Funktionen, die von den Standard-Skripten, die mit &cs; geliefert werden, benötigt werden, die 
+			aber auch in Ihren eigenen Skripten ganz nützlich sein können. Es enthält die Funktion
+            <literal>uniqueName</literal>, die genau das macht, was wir hier brauchen. Die Syntax 
+            lautet:</para>
+
+<screen>filename=cs_helpers.uniqueName(directory,prefix,sufix)</screen>
+
+			<para>Die Funktion sucht einen neuen eindeutigen Dateinamen im angegebenen 
+            <literal>directory</literal>. Der erzeugte Dateiname ist 
+            "<filename>prefix-XXX.suffix</filename>", wobei <literal>XXX</literal>
+			die nächste freie Nummer, angefangen bei 0, ist. Die nächste freie Nummer wird in der Datei
+			<filename>prefix-nextnr</filename> vermerkt und der erzeugte Name wird zurück gegeben.
+            </para>
+
+			<para>Wir können diesen Aufruf einfach in unser Skript einbauen:</para>
+
+			<example><title>Verwendung eindeutiger Dateinamen</title>
+			<programlisting>import capisuite<emphasis>,cs_helpers</emphasis>
+
+my_path="/path/to/the/just/created/capisuite-examples/"
+
+def callIncoming(call,service,call_from,call_to):
+	try:
+		if (call_to=="123"):
+			<emphasis>filename=cs_helpers.uniqueName(my_path,"voice","la")</emphasis>
+			capisuite.connect_voice(call,10)
+			capisuite.audio_send(call,my_path+"announce.la")
+			capisuite.audio_send(call,my_path+"beep.la")
+			capisuite.audio_receive(call,<emphasis>filename</emphasis>,20,3)
+			capisuite.disconnect(call)
+		else:
+			capisuite.reject(call,1)
+	except capisuite.CallGoneError:
+		capisuite.disconnect(call)</programlisting></example>
+			<para>Wenn es Sie interessiert, welche anderen Funktionen in
+            <literal>cs_helpers.py</literal> definiert sind, schauen Sie sich die Referenz unter dem
+            <xref linkend="default_helpers"/> an.</para>
+		</sect2>
+		<sect2 id="incoming_tut_fax_recognition"><title>Automatische Fax-Erkennung und -Empfang</title>
+
+			<para>Als letzten Schritt möchte ich Ihnen zeigen, wie Fax-Erkennung und -Empfang funktionieren
+			und wie man vom Sprach- in den Fax-Modus umschaltet.</para>
+
+			<para>Hier ist das letzte und komplizierteste Beispiel dieses Abschnitts. Es führt vier neue
+			&cs;-Funktionen ein und zeigt, wie die Funktionalität in eine andere Funktion aufgeteilt werden
+			werden kann, die von <literal>callIncoming</literal> genutzt wird. Es gibt viele 
+			änderungen, die weiter unten beschrieben sind - aber die meisten davon sollten nahezu 
+			selbsterklärend sein. Ich glaube daher nicht, dass dieser letzte Schritt zu umfangreich ist. 
+            Und Sie wollen ja nicht noch 10 weitere Schritte lesen, stimmt's? ;-)</para>
+
+			<example><title>Hinzufügen der Fax-Funktionen</title>
+			<programlisting>import capisuite,cs_helpers,os<co id="incoming_ex4_0"/>
+
+my_path="/path/to/the/just/created/capisuite-examples/"
+
+def callIncoming(call,service,call_from,call_to):
+	try:
+		if (call_to=="123"):
+			filename=cs_helpers.uniqueName(my_path,"voice","la")
+			capisuite.connect_voice(call,10)
+			capisuite.enable_DTMF(call)<co id="incoming_ex4_1"/>
+			capisuite.audio_send(call,my_path+"announce.la",1)<co id="incoming_ex4_2"/>
+			capisuite.audio_send(call,my_path+"beep.la",1)
+			capisuite.audio_receive(call,filename,20,3,1)
+			dtmf=capisuite.read_DTMF(call,0)<co id="incoming_ex4_3"/>
+			if (dtmf=="X"):<co id="incoming_ex4_4"/>
+				if (os.access(filename,os.R_OK)):<co id="incoming_ex4_5"/>
+					os.unlink(filename)
+				faxIncoming(call)<co id="incoming_ex4_6"/>
+			capisuite.disconnect(call)
+		else:
+			capisuite.reject(call,1)
+	except capisuite.CallGoneError:
+		capisuite.disconnect(call)
+
+def faxIncoming(call):
+	capisuite.switch_to_faxG3(call,"+49 123 45678","Test headline")<co id="incoming_ex4_7"/>
+	filename=cs_helpers.uniqueName(my_path,"fax","sff")
+	capisuite.fax_receive(call,filename)<co id="incoming_ex4_8"/></programlisting></example>
+
+			<calloutlist>
+				<callout arearefs="incoming_ex4_0">
+					<para>In diesem Beispiel brauchen wir zum ersten Mal ein normales Python-Modul.
+					Das <literal>os</literal>-Modul enthält Funktionen für alle Arten von 
+                    Betriebssystem-Diensten und wird hier benötigt, um eine Datei zu löschen.</para>
+				</callout>
+				<callout arearefs="incoming_ex4_1">
+					<para>DTMF ist die Abkürzung für Dual Tone Multi Frequency. Dies sind die Töne, die
+					generiert werden, wenn Sie die Ziffern auf Ihrem Telefon drücken, und werden
+					normalerweise genutzt, um zu wählen. Sie werden auch von modernen Fax-Geräten gesendet,
+					bevor die übertragung beginnt. Deshalb können die selben Funktionen zur Erkennung von
+					gedrückten Tasten und von Fax-Geräten verwendet werden.
+					</para>
+
+					<para>Bevor irgendein DTMF von &cs; erkannt wird, muss die entsprechende Funktion
+					mit <literal>enable_DTMF</literal> aktiviert werden.</para>
+				</callout>
+				<callout arearefs="incoming_ex4_2">
+					<para>Alle Audio-Sende- und -Empfangsfunktionen unterstützen das Abbrechen, wenn ein
+					DTMF-Ton erkannt wird. Dies wird aktiviert, indem eine "<literal>1</literal>"
+					als letzter Parameter übergeben wird. Es verhindert auch, dass die Funktion startet, 
+					wenn ein DTMF-Zeichen <emphasis>zuvor</emphasis> erkannt, aber noch nicht vom 
+					Skript gelesen wurde.</para>
+				</callout>
+				<callout arearefs="incoming_ex4_3">
+					<para>&cs; speichert alle empfangenen DTMF-Signale in einem Puffer, von wo sie
+                    jederzeit wieder gelesen werden können. Gelesen werden sie von
+                    <literal>read_DTMF</literal>, das auch den Puffer löscht. Sie gibt alle empfangenen
+                    Zeichen in einem String zurück. Wenn der Anrufer "3","5","*" drückt, bekommen Sie "35*".
+					</para>
+
+					<para>Die <literal>0</literal> weist &cs; an, nicht auf DTMF-Signale zu warten - 
+					wenn keine vorhanden sind, wird einfach ein leerer String zurück gegeben.
+					Es ist auch möglich zu sagen, dass eine bestimmte Zeit gewartet werden soll oder
+					bis eine bestimmte Anzahl von Signalen empfangen wurden.</para>
+
+					<note><para>Bitte beachten Sie, dass es nicht erforderlich ist, nach jeder
+                    Audio-Sende- oder -Empfangsfunktion auf empfangene DTMF zu prüfen. Aktivieren Sie
+                    einfach den DTMF-Abbruch in allen Befehlen in einem Block und prüfen Sie auf empfangene
+					Töne nach dem ganzen Block.
+					</para></note>
+				</callout>
+				<callout arearefs="incoming_ex4_4">
+					<para>Fax-Geräte senden einen speziellen Ton, der vom CAPI als
+					"<literal>X</literal>" repräsentiert wird. Wenn Sie also den String
+					"X" empfangen, ruft ein Fax-Gerät an und wir sollten unsere Fax-Routinen starten.
+                    </para>
+				</callout>
+				<callout arearefs="incoming_ex4_5">
+					<para>Möglicherweise war die Ansage so kurz, dass die Aufnahme schon begonnen hat,
+					bevor das Fax erkannt wurde. Wir wollen keine Datei speichern, die nur das Fax-Piepen
+					enthält. Deshalb testen wir, ob sie erzeugt wurde (<function>os.access</function>
+					prüft die Existenz einer Datei) und löschen sie wenn nötig, indem wir
+					<literal>os.unlink</literal> aufrufen.</para>
+				</callout>
+				<callout arearefs="incoming_ex4_6">
+					<para>Fax-Behandlung wurde in einer separaten Funktion realisiert, die hier aufgerufen
+                    wird.</para>
+				</callout>
+				<callout arearefs="incoming_ex4_7">
+					<para>Bis jetzt ist diese Verbindung im Sprach-Modus (der von
+					<literal>connect_voice</literal> gesetzt wurde). Wenn wir nun ein Fax empfangen
+                    wollen, müssen wir den Modus auf Fax umstellen. Dies wird mit 
+                    <literal>switch_to_faxG3</literal> gemacht. Da das Fax-Protokoll einige zusätzliche
+                    Parameter benötigt, müssen sie hier angegeben werden. Der erste String ist die sog.
+                    <emphasis>Fax-Gerätekennung</emphasis>, die an das anrufende Fax geschickt und die
+					im Protokoll angezeigt wird, während der zweite eine 
+                    <emphasis>Fax-Titelzeile</emphasis> ist. Diese Titelzeile wird hauptsächlich beim
+					Versenden von Faxen verwendet. Um ehrlich zu sein, ich persönlich weiss nicht, ob es 
+					irgendeinen Sinn macht diese anzugeben, wenn Sie nur Faxe empfangen möchten. Aber es
+					schadet sicher auch nicht ;-). Wenn das jemand sicher weiss, sage er's mir bitte.
+                    </para>
+
+					<note><para>Wenn Sie eine eigene Nummer nur für Fax-Zwecke nutzen möchten, sollten
+					Sie <emphasis>nicht</emphasis> <literal>switch_to_faxG3</literal> benutzen.
+					Benutzen Sie stattdessen <literal>connect_faxG3</literal>.</para></note>
+				</callout>
+				<callout arearefs="incoming_ex4_8">
+					<para>Nachdem die Verbindung erfolgreich in den Fax-Modus umgeschaltet wurde, können
+					wir schließlich das Fax-Dokument empfangen. Die benutzte Funktion
+					<literal>fax_receive</literal> bekommt einen neuen Namen, der wieder von
+					<literal>cs_helpers.uniqueName</literal>erzeugt wird wie oben.</para>
+				</callout>
+			</calloutlist>
+
+			<para>Glückwunsch. Sie haben mein kleines Tutorial beendet. Jetzt sind Sie dran - Sie können
+			ein bisschen mit dem erstellten Skript herumspielen und versuchen, es noch weiter zu
+			vervollständigen. Viele der oben benutzten Kommandos liefern nützliche Rückgabewerte, die wir bisher
+			der Einfachkeit halber nicht ausgewertet haben. Außerdem gibt es noch anderes zu tun -
+			empfangene Anrufe per E-Mail an den Benutzer schicken, Verbindungen protokollieren, ...
+			Wenn Sie dieses Skript vervollständigen wollen, ist der <xref linkend="command_reference"/>
+			hilfreich. Sie können auch hier weiter lesen, um einen kurzen Blick auf das Idle-Skript zu werfen,
+			gefolgt von einem schnellen überblick über die Struktur der Standard-Skripte, die mit &cs;
+			geliefert werden.</para>
+		</sect2>
+	</sect1>
+
+	<sect1 id="idle_examples"><title>Beispiel eines Idle-Skripts</title>
+
+		<para>Nachdem wir gesehen haben, wie eingehende Anrufe behandelt werden, folgt nun eine sehr
+        kurze Einführung, wie ausgehende Anrufe mit Hilfe des Idle-Skripts initiiert werden.</para>
+
+		<para>Wie bereits erwähnt, wird das Idle-Skript in regelmäßigen Abständen von &cs; aufgerufen,
+		um irgendwo nach gespeicherten Aufträgen zu suchen und diese dann zu verschicken.</para>
+
+		<para>Das hier vorgestellte Beispiel sucht nach einer Datei <filename>job-XXXX.sff</filename>
+        im Beispiel-Verzeichnis, das wir im letzten Abschnitt erzeugt haben. Diese Datei wird an das durch
+		<literal>XXXX</literal> angegebene Ziel gefaxt. Wenn Sie kein gültiges Ziel haben, an das Sie
+		zum Testen Faxe schicken können, warum nehmen Sie nicht einfach &cs; als Absender und Emfänger
+		gleichzeitig? Ersetzten Sie in diesem Fall <literal>XXXX</literal> durch die Nummer, die Ihr
+		Incoming-Skript behandelt. Dies funktioniert nich, wenn Ihre ISDN-Karte nicht zwei Fax-übertragungen
+		parallel durchführen kann (einige alte AVM-B1-Karten haben z.B. diese Beschränkung).</para>
+
+		<para>Wir brauchen jetzt für unsere Tests ein oder mehrere Fax-Dateien im SFF-Format. Erzeugen Sie
+		bitte welche mit einem Namen wie der oben gezeigte. Wenn Sie nicht wissen, wie Sie dies tun sollen,
+		schauen Sie bitte unter dem <xref linkend="create_sff"/> nach.</para>
+
+		<para>Wenn ich ein &cs;-Skript entwicklen möchte, aber nicht sicher bin, wie es geht, fange ich oft
+		mit einem normalen Skript an, das ich ohne &cs; testen kann. Lassen Sie uns also zuerst ein Skript
+        erstellen, das die Dateien durchsucht und die Empfängernummern extrahiert. Wenn das funktioniert,
+		können wir weiter machen und die &cs;-spezifischen Aufrufe einfügen.</para>
+
+		<example><title>idle_example.py</title>
+			<programlisting>import os,re<co id="idle_ex1_1"/>
+
+my_path="/path/to/your/capisuite-examples/"
+
+files=os.listdir(my_path)<co id="idle_ex1_2"/>
+files=filter (lambda s: re.match("job-.*\.sff",s),files)<co id="idle_ex1_3"/>
+
+for job in files:<co id="idle_ex1_4"/>
+	destination=job[4:-3]<co id="idle_ex1_5"/> # Hmmm.. Ist das richtig?
+	print "found",job,"to destination",destination</programlisting>	</example>
+
+		<calloutlist>
+			<callout arearefs="idle_ex1_1">
+				<para>Wir kennen das <literal>os</literal>-Modul bereits.
+				<literal>re</literal> stellt Funktionen zum Suchen nach regulären Ausdrücken zur
+				Verfügung. Wenn Sie nicht wissen, was reguläre Ausdrücke sind, lesen Sie bitte z.B. die
+				Python-Dokumentation des <literal>re</literal>-Moduls oder eine andere Dokumentation 
+                dazu. Sie sind zu kompliziert, um sie hier zu erklären.</para>
+			</callout>
+			<callout arearefs="idle_ex1_2">
+				<para><literal>os.listdir</literal> gibt die Dateien eines Verzeichnisses als
+				Liste zurück.</para>
+			</callout>
+			<callout arearefs="incoming_ex1_3">
+				<para>Diese Zeile ist ein bisschen trickreicher. Sie filtert alle Dateinamen aus der Liste
+				heraus, die nicht zur Regel <emphasis>mit "job-" beginnen, dann eine beliebige Anzahl
+				von Zeichen, mit ".sff" aufhören</emphasis> passen. Dies wird mit der
+				<literal>filter</literal>-Funktion gemacht. Die Funktion erwartet den Namen einer
+				Funktion, die die Regel als ersten Parameter prüft und die zu filternde Liste der
+				Dateien als zweiten.</para>
+
+				<para>Wir können jetzt eine neue Funktion definieren und ihren Namen hier verwenden, aber
+				das <literal>lambda</literal>-Schlüsselwort erlaubt eine viel elegantere Lösung: Es
+				definiert eine "namenlose Funktion" mit dem Parameter <literal>s</literal>. Der
+				Funktionsrumpf folgt direkt danach und besteht aus einem Aufruf von
+				<literal>re.match</literal>, der prüft, ob der übergebene String
+				<literal>s</literal> auf den Ausdruck passt.
+				</para>
+
+			</callout>
+			<callout arearefs="incoming_ex1_4">
+				<para>Iterieren über alle gefundenen Dateinamen.</para>
+			</callout>
+			<callout arearefs="incoming_ex1_5">
+				<para>Das Ziel wird aus dem gegebenen Dateinamen mit Hilfe von String-Indizes extrahiert.
+				</para>
+			</callout>
+		</calloutlist>
+
+		<para>Speichern Sie das Skript jetzt als <filename>idle_example.py</filename> in unserem
+        Beispielverzeichnis und lassen Sie es laufen, indem Sie
+		<command>python idle_example.py</command> aufrufen.</para>
+
+		<para>Wenn Sie SFF-Dateien mit den richtigen Namen angelegt haben, sollten Sie nun Zeile für Zeile
+		angezeigt werden. Aber... Offensichtlich funktioniert irgendetwas hier nicht richtig. Das Ziel
+		enthält den "<literal>.</literal>". Ich habe tatsächlich einen Fehler beim indizieren des 
+        Strings gemacht. Es sollte <literal>destination=job[4:-4]</literal> anstatt 
+        <literal>[4:-3]</literal> heißen. ändern wir das also und probieren es nochmal. Es sollte jetzt
+        funktionieren. Das ist der Grund, warum ich solche Skripte lieber zuerst außerhalb von &cs; 
+		schreibe. Das Debuggen geht so viel schneller...</para>
+
+		<para>Da wir jetzt wissen, dass die grundlegenden Teile funktionieren, können wir die richtigen
+        Kommunikationsfunktionen hinzufügen.</para>
+
+		<para>Speichern Sie dieses Beispiel bitte wieder als <filename>idle_example.py</filename> in
+        Ihrem Beispielverzeichnis.</para>
+
+		<example><title>idle_example.py, Version für &cs;</title>
+			<programlisting>import os,re<emphasis>,capisuite</emphasis>
+
+my_path="/path/to/your/capisuite-examples/"
+my_number="678"<co id="idle_ex2_1"/>
+my_stationID="+49 123 45678"
+my_headline="example headline"
+
+def idle(capi):<co id="idle_ex2_4"/>
+	files=os.listdir(my_path)
+	files=filter (lambda s: re.match("job-.*\.sff",s),files)
+
+	for job in files:
+		destination=job[4:-4]
+		capisuite.log("sending "+job+" to destination "+destination,1)<co id="idle_ex2_5"/>
+		try:
+			(call,result)=capisuite.call_faxG3(capi,1,my_number,destination,
+			  60,my_stationID,my_headline)<co id="idle_ex2_6"/>
+			if (result!=0):<co id="idle_ex2_7"/>
+				capisuite.log("job "+job+" failed at call setup with reason "
+				  +str(hex(result)),1)
+				os.rename(my_path+job,my_path+"failed-"+job)<co id="idle_ex2_9"/>
+				return<co id="idle_ex2_10"/>
+			capisuite.fax_send(call,my_path+job)<co id="idle_ex2_11"/>
+			(result,resultB3)=capisuite.disconnect(call)<co id="idle_ex2_12"/>
+		except capisuite.CallGoneError:
+			(result,resultB3)=capisuite.disconnect(call)
+			
+		if (result in (0,0x3400,0x3480,0x3490,0x349f) and resultB3==0):<co id="idle_ex2_13"/>
+			capisuite.log("job "+job+" was successful",1)
+			os.rename(my_path+job,my_path+"done-"+job)
+			return
+		else:
+			capisuite.log("job "+job+" failed during send with reasons "
+			  +str(hex(result))+","+str(hex(resultB3)),1)
+			os.rename(my_path+job,my_path+"failed-"+job)</programlisting>
+		</example>
+
+		<calloutlist>
+			<callout arearefs="idle_ex2_1">
+				<para>Einige Parameter für das Senden des Faxes werden hier gesetzt. 
+                <literal>my_number</literal> ist Ihre eigene Nummer, die zum Senden des Faxes verwendet
+				wird. <literal>my_stationID</literal> ist die Fax-Gerätekennung, die an die Gegenstelle
+				übermittelt und auf der gesendeten Fax-Seite angezeigt wird. Es sind nur Ziffern und das "+"
+                erlaubt. Sie können außerdem in <literal>fax_headline</literal> einen kurzen Text 
+                definieren, der in der Fax-Kopfzeile angezeigt wird.</para>
+			</callout>
+			<callout arearefs="idle_ex2_4">
+				<para>Wie im <xref linkend="ug_scripts_idle"/> erklärt, müssen Sie eine Funktion
+				namens <literal>idle</literal> definieren, die dann in regelmäßigen Abständen von &cs;
+                ausgeführt wird. Deshalb wurde aller Code in diese Funktion verschoben.</para>
+			</callout>
+			<callout arearefs="idle_ex2_5">
+				<para>Wir können keine Meldungen nach stdout ausgeben, da das Skript im Kontext eines
+                Daemons läuft. Deshalb stellt &cs; Funktionen bereit, um Einträge in den &cs;-Log-Dateien
+				zu erzeugen. <function>log</function> erwartet mindestens zwei Parameter: die Meldung
+                und einen Log-Level. Dieser Level entspricht der Log-Level-Einstellung in der globalen
+				&cs;-Konfiguration (siehe <xref linkend="configcs"/>). Wenn der Level der Meldung
+				<emphasis>kleiner oder gleich</emphasis> verglichen mit dem Level in der Konfiguration
+                ist, wird sie in die Logs geschrieben. Sie können also Meldungen zu Debug-Zwecken einfügen,
+                die im Normalbetrieb nicht in die Logs geschrieben werden, indem Sie Level größer als 1
+				verwenden.</para>
+			</callout>
+			<callout arearefs="idle_ex2_6">
+				<para>Diese Funktion initiiert einen ausgehenden Anruf, bei dem der Fax-Service verwendet
+                wird. Die Parameter sind:</para>
+				<itemizedlist>
+					<listitem><para>Referenz auf das von &cs; erhaltene CAPI-Objekt (Parameter für 
+                    <function>idle</function>).</para></listitem>
+					<listitem><para>Die Nummer des Controllers, der für ausgehende Anrufe verwendet 
+                    wird. Der erste Controller hat immer die Nummer "1".</para></listitem>
+					<listitem><para>Die eigene Nummer, die für ausgehende Anrufe verwendet wird
+                    </para></listitem>
+					<listitem><para>Die Empfängernummer des Anrufs</para></listitem>
+					<listitem><para>Maximale Zeit in Sekunden, die auf einen erfolgreichen 
+                    Verbindungsaufbau gewartet werden soll</para></listitem>
+					<listitem><para>Die Fax-Gerätekennung</para></listitem>
+					<listitem><para>Die Fax-Kopfzeile</para></listitem>
+				</itemizedlist>
+				<para>Die Funktion gibt ein Tuple zurück, das eine Referenz auf den erzeugten Anruf und
+                einen Fehler-Code enthält.</para>
+			</callout>
+			<callout arearefs="idle_ex2_7">
+				<para>Dieser Block prüft, ob der Verbindungsaufbau erfolgreich war. Eine detaillierte
+                Beschreibung der möglichen Fehler-Codes finden Sie im
+				<xref linkend="command_reference"/>. 0 bedeutet "alles war OK, die Verbindung wurde
+                aufgebaut".</para>
+			</callout>
+			<callout arearefs="idle_ex2_9">
+				<para>Wenn der Anruf nicht erfolgreich war, wird die Fax-Datei umbenannt, um zu verhinden,
+                dass die selbe Datei immer wieder verschickt wird.</para>
+			</callout>
+			<callout arearefs="idle_ex2_10">
+				<para>Vergessen Sie nicht, die <function>idle</function>-Funktion zu verlassen,
+                wenn die Verbindung nicht aufgebaut werden konnte!</para>
+			</callout>
+			<callout arearefs="idle_ex2_11">
+				<para>Ein weiteres sehr einfaches &cs;-Kommando: verschickt die gegebene Datei als 
+                Fax-Dokument.</para>
+			</callout>
+			<callout arearefs="idle_ex2_12">
+				<para>Wir haben bislang die Gründe, <emphasis>warum</emphasis> eine Verbindung
+                beendet wurde, ignoriert. Jetzt müssen wir sie analysieren, weil wir wissen müssen, ob die
+				Datei erfolgreich übertragen wurde. Deshalb gibt <function>disconnect</function> 
+                ein Tuple zurück, das den physikalischen und logischen Fehler-Code enthält. Jede
+				ISDN-Verbindung enthält eine physikalische und (mindestens) eine logische Verbindung. 
+                Man kann sich die physikalische Verbindung als "den Draht" vorstellen, der uns mit dem
+                Empfänger verbindet, während sich die logische Verbindung auf das Fax-Protokoll bezieht,
+				das diesen "Draht" verwendet. Sie müssen sich beide Werte ansehen, um entscheiden zu können,
+                ob alles OK war.</para>
+			</callout>
+			<callout arearefs="idle_ex2_13">
+				<para>Erlaubte Werte für den physikalischen Verbindungsabbau sind 0,0x3400,0x3480, 0x3490 und
+                0x349f. Diese bedeuten alle "kein Fehler aufgetreten, Verbindung wurde normal beendet". Der
+                logische Wert kann nur 0 sein, wenn alles OK ist. Weitere Informationen zu den Fehler-Codes
+				finden Sie im <xref linkend="command_reference"/>.</para>
+			</callout>
+		</calloutlist>
+
+		<para>Nachdem Sie die Datei gespeichert und die Standard-Werte an Ihre eigene Konfiguration
+        angepasst haben, ändern Sie bitte den Wert von <literal>idle_script</literal> in der
+        &cs;-Konfiguration, damit er auf dieses Skript verweist (wie im <xref linkend="configcs"/>
+        beschrieben).
+		</para>
+
+		<para>Starten Sie &cs; neu und beobachten Sie die Logs. Einige Minuten später sollten die Dateien
+        <filename>job-XXX.sff</filename> verschickt worden und entweder in
+		<filename>done-job-XXX.sff</filename> oder <filename>failed-job-XXX.sff</filename>
+        umbenannt worden sein. Wenn der Auftrag fehlgeschlagen ist, schauen Sie bitte in das Error-Log und
+        prüfen die Fehler-Codes, die im	<xref linkend="command_reference"/> und 
+        <xref linkend="capicodes"/> beschrieben sind.</para>
+
+		<para>Hoffentlich hat Ihnen dieses Tutorial geholfen zu verstehen, wie Sie Ihre eigenen Skripte
+        schreiben können. Machen Sie bitte weiter, indem Sie die Beispiele oder die Dateien, die mit &cs;
+		geliefert werden, modifizieren (lesen Sie den <xref linkend="default_script_overview"/> zuvor).
+        Sie finden eine komplette Referenz der verfügbaren Kommandos im 
+        <xref linkend="command_reference"/>.</para>
+
+		<para>Wenn Sie Schwierigkeiten haben, Ihre eigenen Skripte zum Laufen zu bringe, nutzen Sie bitte
+        die &cs;-Mailingliste. Und vergessen Sie nicht, Spaß dabei zu haben. ;-)</para>
+	</sect1>
+
+	<sect1 id="default_script_overview"><title>Struktureller überblick über die Standard-Skripte</title>
+		<sect2 id="default_incoming"><title>incoming.py</title>
+			<para>Das Incoming-Skript behandelt alle eingehenden Verbindungen. Es liest zwei 
+            Konfigurationsdateien, die alle benötigten Daten enthalten, die detailliert im
+			<xref linkend="script_config"/> beschrieben wurden. Die Gesamtstruktur wird hier beschrieben
+            und gibt Ihnen einen überblick, wie es implementiert ist.</para>
+			
+			<para>Zuerst (nachdem einige benötigte Module importiert wurden) wird die benötigte Funktion 
+            <function>callIncoming</function>definiert, die bei Bedarf andere Funktionen aufruft.
+            </para>
+
+			<sect3 id="default_incoming_1"><title>Funktion <function>callIncoming</function></title>
+				<para>Diese Funktion beginnt mit einem Aufruf von 
+                <function>cs_helpers.readConfig</function>, um die Konfiguration zu lesen.
+				Sie iteriert dann über alle Abschnitte, die die konfigurierten Benutzer repräsentieren
+                (außer <literal>GLOBAL</literal>), um zu prüfen, ob die angerufene Nummer zu 
+                irgendeinem Benutzer gehört. Wenn eine übereinstimmumg gefunden wurde, wird der Benutzer und
+				der definierte Service unter <literal>curr_user</literal> und
+                <literal>curr_service</literal> gespeichert.</para>
+
+				<para>Wenn keine Übereinstimmumg gefunden wurde (<literal>curr_user</literal> ist
+                leer), wird der Anruf abgewiesen und die Funktion verlassen. Andernfalls wird der Anruf mit dem
+				richtigen Service (Fax oder Sprache) angenommen und entweder
+				<function>faxIncoming</function> oder <function>voiceIncoming</function>
+				aufgerufen.</para>
+
+				<para>Die Funktion definiert außerdem einen
+				Exception-Handler für <literal>capisuite.CallGoneError</literal>.</para>
+			</sect3>
+			<sect3 id="default_incoming_2"><title>Funktion <function>faxIncoming</function></title>
+				<para>Zuerst wird das Verzeichnis für eingehende Faxdaten bestimmt und erzeugt,
+				falls es nocht nicht existiert. Die Existenz des angegebenen Users wird überprüft
+				und ein Log-Eintrag erzeugt.</para>
+
+				<para>Dann wird, falls nötig, in den Faxmodus umgeschaltet, ein eindeutiger Dateiname
+				erzeugt und die Funktion <function>capisuite.fax_receive</function> aufgerufen. Das
+				Resultat des anschließenden Verbindungsabbaus wird protokolliert. Zum Schluss wird
+				überprüft, ob das Fax erfolgreich empfangen wurde, und wenn ja wird die Datei dem
+				entsprechenden User übereignet und ihm als Mail zugestelt.</para>
+			</sect3>
+			<sect3 id="default_incoming_3"><title>Funktion <function>voiceIncoming</function></title>
+				<para><function>voiceIncoming</function> hat viel mehr Aufgaben zu erledigen, wie
+                Fax-Erkennung und Wechsel in den Fax-Modus, die Fernabfrage starten usw.</para>
+
+				<para>Sie fängt mit dem Bestimmen des zu verwendenden Verzeichnisses und dem Erzeugen
+                eines eindeutigen Dateinamens an. Außerdem wird die PIN für die Fernabfrage in einer
+				privaten Variable gespeichert. Es gibt jetzt zwei Möglichkeiten: der Benutzer hat bereits
+                eine eigene Ansage - in diesem Fall wird sie jetzt abgespielt. Andernfalls wird eine
+                vordefinierte Ansage, die einen allgemeinen Text und die angerufene Nummer enthält, 
+                abgespielt. Wenn das Aufnehmen einer Nachricht nicht deaktivert wurde (indem 
+                <literal>voice_action</literal> auf <literal>None</literal> gesetzt wurde),
+				start die Aufnahme jetzt nach dem Piep.</para>
+
+				<para>Alle bisher benutzten Aufrufe von <function>audio_send</function> und 
+                <literal>audio_receive</literal> hatten DTMF-Abbruch aktiviert, sodass das Skript
+				alle Anrufe "überspringt", nachdem ein DTMF-Signal erkannt wurde. Danach wird
+				<function>read_DTMF</function> verwendet, um zu prüfen, ob so ein Signal erkannt wurde.
+                "<literal>X</literal>" steht für den Fax-Ton und schaltet auf das Fax-Protokoll um
+				und ruft <function>faxIncoming</function> auf. Alle anderen empfangenen Signale
+				werden als Teil der PIN für die Fernabfrage interpretiert. Deshalb wird eine Schleife
+                durchlaufen, die 3 Sekunden nach jedem Ton auf den nächsten wartet. Wenn eine gültige PIN 
+                eingegeben wird, startet sie <function>remoteInquiry</function>. Nach drei falschen
+                Versuchern bricht sie die Verbindung ab.</para>
+
+				<para>Nach dem Verbindungsabbau und dem Protokollieren wird ein eine Beschreibungsdatei
+                geschrieben (wenn die aufgenommene Datei existiert), bei beiden Dateien wird der Eigentümer
+				auf den richtigen Benutzer geändert und die aufgenommene Nachricht wird an ihn/sie gemailt.
+                </para>
+			</sect3>
+			<sect3 id="default_incoming_4"><title>Funktion <function>remoteInquiry</function></title>
+				<para><function>remoteInquiry</function> startet mit dem Erzeugen einer Lock-Datei
+                und dem Anfordern einer exklusiven Sperre darauf, um zu verhindern, dass zwei Fernabfragen
+				für den selben Benutzer parallel laufen. Wenn die Sperre nicht angefordert werden kann, wird
+                eine Fehlermeldung abgespielt und die Funktion wird verlassen. Wenn das Sperren erfolgreich
+                war, wird eine Liste der aufgenommenen Sprachanrufe erstellt, indem das Benutzerverzeichnis
+                aufgelistet, gefiltert und sortiert wird. Jetzt wird eine Datei namens 
+                <filename>last_inquiry</filename> gelesen, wenn sie existiert.
+				Sie enthält die Nummer der zuletzt angehörten Nachricht. Mit dieser Information können
+                die alten Nachrichten in eine separate Liste heraus gefiltert werden, sodass sich der 
+                Anrufer zuerst die Nachrichten anhören kann, die er noch nicht kennt.</para>
+
+				<para>Die Anzahl neuer Nachrichten wird angesagt, gefolgt von einem kleinen Menü, in dem
+                der Anrufer auswählen kann, ob er entweder eine Ansage aufnehmen oder eine
+				aufgezeichnete Nachricht anhören möchte. Wenn er die Aufnahme einer Ansage auswählt, 
+                wird die Funktion <function>newAnnouncement</function> aufgerufen, andernfalls wird mit
+				<function>remoteInquiry</function> weiter gemacht.</para>
+
+				<para>Jetzt läuft eine Schleife zuerst über alle neuen und dann über alle alten
+                Nachrichten. Sie beginnt, indem sie dem Anrufer mitteilt, wieviele Nachrichten gefunden
+				wurden. Dann werden alle Nachrichten abgespielt, indem die folgenden Schritte für jede 
+                wiederholt werden:</para>
+
+				<itemizedlist>
+					<listitem><para>Lesen der Beschreibungsdatei der aktuellen Nachricht
+                    </para></listitem>
+					<listitem><para>Abspielen eines Informationsblocks, der die aktuelle Nummer der
+                    Nachricht, den Absender, den Empfänger sowie Datum und Uhrzeit des Anrufs enthält.
+                    </para>
+					</listitem>
+					<listitem><para>Abspielen der Nachricht</para></listitem>
+					<listitem><para>Anbieten eines Menüs, in dem der Anrufer zur nächsten oder vorigen
+                    Nachricht gehen kann, die aktuelle Nachricht wiederholen oder löschen kann.</para>
+					</listitem>
+				</itemizedlist>
+
+				<para>Am Ende wird der Anrufer informiert, dass keine weiteren Nachrichten vorhanden sind
+                und dass die Verbindung beendet wird. Danach wird die Lock-Datei wieder freigegeben und 
+				gelöscht.</para>
+			</sect3>
+			<sect3 id="default_incoming_5"><title>Funktion <function>newAnnouncement</function></title>
+				<para><function>newAnnouncement</function> präsentiert dem Anrufer zuerst einige 
+                Instruktionen. Danach wird die neue Ansage in eine temporäre Datei aufgezeichnet. Um dem
+                Benutzer die Möglichkeit zu geben, die Ansage zu überprüfen, wird sie nun noch einmal
+                abgespielt, gefolgt von einem Menü, das es dem Benutzer erlaubt, die Ansage zu speichern
+				oder die Aufnahme zu wiederholen. Wenn der Benutzer sie speichern will, wird sie von der
+                temporären Datei nach <filename>announcement.la</filename> im Sprach-Verzeichnis des
+                Benutzers verschoben und der Eigentümer auf ihn geändert. Der Anruf wird abgeschlossen mit
+				einer Bestätigung an den Anrufer, dass die Ansage erfolgreich gespeichert wurde.</para>
+			</sect3>
+		</sect2>
+		<sect2 id="default_idle"><title>idle.py</title>
+			<para>Das Idle-Skript ist verantwortlich für das Einsammeln der Jobs aus den Send-Queues 
+            (wo sie von <command>capisuitefax</command> gespeichert werden) und deren Versendung an
+            die angegebenen Empfänger. Es liest seine Konfiguration ebenfalls aus den Dateien, die im 
+            <xref linkend="script_config"/> beschrieben wurden.
+			</para>
+
+			<sect3 id="default_idle_1"><title>Funktion <function>idle</function></title>
+				<para>Nach dem Lesen der Konfiguration durch den Aufruf von 
+                <function>cs_helpers.readConfig</function> und dem Prüfen der Existenz der benötigten
+				Archiv-Verzeichnisse wird die Benutzerliste aus der Liste der vorhandenen Abschnitte 
+                erstellt.</para>
+
+				<para>Für jeden Benuzter, der ein gültiges Fax-Setup besitzt (andernfalls wird dieser 
+                Benutzer übersprungen), wird die Send-Queue überprüft. Wenn die benötigten 
+				Queue-Verzeichnisse nicht existieren, werden sie erzeugt. Danach wird eine Liste namens
+                <literal>files</literal> mit den Namen aller Dateien in der Send-Queue erstellt
+				und gefiltert, damit sie nur Fax-Aufträge enthält.</para>
+
+				<para>Für jeden gefundenen Auftrag wird ein Sicherheits-Check gemacht, um zu prüfen, ob 
+                er vom richtigen Benutzer erzeugt wurde. Wenn dieser Check erfolgreich war, wird eine
+				Lock-Datei erzeugt und eine Sperre darauf angefordert. Dies verhindert, das der 
+                <command>capisuitefax</command>-Befehl einen Auftrag abbricht, während er übertragen
+                wird. Danach wird die Existenz der Datei überprüft (vielleicht wurde der Auftrag abgebrochen,
+                bevor wir eine Sperre bekommen konnten?).</para>
+
+				<para>Jetzt wird die Beschreibungsdatei für diesen Auftrag gelesen und die Startzeit wird
+                überprüft. Wenn sich noch nicht erreicht ist, macht das Skript mit dem nächsten Auftrag
+				weiter. Andernfalls werden einige Parameter aus der Konfiguration genommen und ein 
+                Log-Eintrag erzeugt. Die Datei wird durch den Aufruf von <function>sendfax</function>
+                übertragen. Das Ergebnis wird gespeichert und protokolliert. Wenn der Auftrag erfolgreich
+                war, wird er ins Done-Verzeichnis verschoben und eine Bestätigung an den Benutzer gemailt.
+				Wenn er nicht erfolgreich war, wird die Verzögerungszeit aus der Konfiguration bestimmt 
+                und die neue Startzeit wird berechnet, indem die alte Startzeit um das Intervall erhöht wird.
+				Ein Zähler für die Versuche wird erhöht und die Beschreibungsdatei wird mit den neuen Werten
+                neu geschrieben. Wenn die Anzahl der Versuche das konfigurierte Maximum überschreitet, 
+                wird der Auftrag in das Failed-Verzeichnis verschoben und der Fehler wird dem Benutzer per
+				Mail berichtet.</para>
+
+				<para>Zuletzt wird die Lock-Datei entsperrt und gelöscht.</para>
+			</sect3>
+			<sect3 id="default_idle_2"><title>Funktion <function>sendfax</function></title>
+				<para>Diese Funktion realisiert den Sendeprozess. Nachdem die zu verwendende MSN entweder
+                aus der <literal>outgoing_MSN</literal>-Einstellung oder aus der
+				<literal>fax_numbers</literal>-Liste bestimmt wurde, wird ein Anruf zum Ziel initiiert.
+                Wenn dies schief geht, wird die Funktion verlassen; andernfalls wird die Datei gesendet und
+                die Verbindung beendet.</para>
+			</sect3>
+			<sect3 id="default_idle_3"><title>Funktion <function>movejob</function></title>
+				<para>Dies ist eine kleine Hilfsfunktion, die zum Verschieben eines Auftrags und der 
+                zugehörigen Beschreibungsdatei in ein anderes Verzeichnis verwendet wird.</para>
+			</sect3>
+
+		</sect2>
+		<sect2 id="default_capisuitefax"><title>capisuitefax</title>
+			<para><command>capisuitefax</command> erlaubt das Einreihen von Fax-Aufträgen, das
+            Auflisten der aktuellen Queue und das Abbrechen von Aufträgen. Es wird nicht direkt vom
+			&cs;-System benutzt - es ist ein Frontend für das Send-Queue-Verzeichnis des Benutzers. Es hat
+            verschiedene Kommandozeilenoptionen - eine Beschreibung finden Sie im
+			<xref linkend="usingscripts_send"/>.</para>
+
+			<para>Es werden zunächst drei Hilfsfunktionen definiert. 
+            <emphasis><function>usage</function></emphasis> gibt einen kleinen Hilfetext aus,
+			wenn "<option>--help</option>" oder "<option>-h</option>" als Parameter angegeben
+            wurde oder wenn ein unbekannter Parameter übergeben wurde. 
+            <emphasis><function>showlist</function></emphasis> erstellt ein Listing des
+            Send-Queue-Verzeichnisses des Benutzers und gibt es schön formatiert als Tabelle aus. 
+            <emphasis><function>abortjob</function></emphasis> entfernt einen Auftrag aus der
+            Queue. Sie macht dies sicher, indem eine Lock-Datei verwendet wird, damit es keine Konflikte
+            mit dem Sendeprozess gibt.</para>
+
+			<para>Der Haupt-Code dieses Skripts prüft zuerst die angegebenen Kommandozeilenoptionen. 
+            Es setzt verschiedene Variablen auf die übergebenen Werte. Nach einigen Gültigkeitprüfungen
+            der Optionen, der Benutzerrechte für das Versenden von Faxen und der Existenz der erforderlichen
+            Verzeichnisse, erfüllt es die gewünschte Aufgabe. Entweder wird 
+            <function>listqueue</function> aufgerufen, um ein Listing der aktiven Aufträge anzuzeigen,
+			<function>abortjob</function>, um einen Job abzubrechen oder die angegebenen Dateien
+            werden verarbeitet und in die Queue geschrieben.</para>
+
+			<para>Um einen Auftrag zu verarbeiten, wird seine Existenz und sein Format geprüft. 
+            Momentan ist nur PostScript erlaubt. Der &cs;-Kern selbst unterstützt nur das SFF-Format. 
+            Deshalb werden die Dateien mit <command>ghostscript</command> von PostScript nach SFF 
+            konvertiert. Zuletzt wird die Beschreibungsdatei für den Auftrag erstellt, die die angegebenen
+            Parameter wie die Empfängernummer enthält.</para>
+		</sect2>
+		<sect2 id="default_helpers"><title>cs_helpers.py</title>
+			<para>Das <filename>cs_helpers.py</filename>-Skript enthält viele kleine 
+            Hilfsfunktionen, die in anderen Skripten verwendet werden. Diese sind:</para>
+			
+			<variablelist>
+				<varlistentry>
+					<term><function>readConfig</function></term>
+					<listitem><para>Liest entweder die Konfigurationsdateien, die im 
+                    <xref linkend="script_config"/> beschrieben sind oder eine beliebige
+					Konfigurationsdatei wie die Beschreibungsdateien, die zu jeder empfangenen Datei oder 
+                    zu jedem ausgehenden Auftrag gehören.</para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term><function>escape</function></term>
+					<listitem><para>Maskiert Sonderzeichen in einem Dateinamen; d.h. schließt ihn in
+					Anführungszeichen ein. Damit kann der Dateiname auch problemlos in Kommandozeilen benutzt
+					werden, wenn er Sonderzeichen oder Leerzeichen enthält.</para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term><function>getOption</function></term>
+					<listitem><para>Liest eine Option aus dem angegebenen Benutzerabschnitt oder nimmt
+                    den globalen Abschnitt, wenn keiner gefunden wurde.</para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term><function>getAudio</function></term>
+					<listitem><para>Liest eine Audio-Datei aus dem Benutzerverzeichnis oder dem globalen
+                    &cs;-Verzeichnis.</para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term><function>uniqueName</function></term>
+					<listitem><para>Konstruiert einen neuen Dateinamen im angegebenen Verzeichnis aus
+                    einem gegebenen Präfix &amp; Suffix und fügt einen Zähler hinzu. Siehe
+					auch <xref linkend="incoming_tut_unique_names"/>.</para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term><function>sendMIMEMail</function></term>
+					<listitem><para>Sendet eine E-Mail mit Attachment an den angegebenen Benutzer. 
+                    Sie unterstützt auch automatische Format-Konvertierung SFF -> PDF und
+					invertiert A-Law -> WAV.</para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term><function>sendSimpleMail</function></term>
+					<listitem><para>Sendet eine normale E-Mail ohne Attachment an den angegebenen 
+                    Benutzer.</para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term><function>writeDescription</function></term>
+					<listitem><para>Erzeugt eine Beschreibungsdatei, die später von 
+                    <function>readConfig</function> gelesen werden kann.</para></listitem>
+				</varlistentry>
+				<varlistentry>
+					<term><function>sayNumber</function></term>
+					<listitem><para>Unterstützt die Ansage einer Nummer, indem verschiedene
+                    Wave-Fragmente verwendet werden. Funktioniert momentan nur für deutsche Ausgabe.
+                    </para></listitem>
+				</varlistentry>
+			</variablelist>
+			
+			<para>Eine detaillierte Beschreibung aller Funktionen und ihrer Verwendung finden Sie in den
+            Skripten selbst. Dort gibt es Kommentare, die jede Funktion im Detail beschreiben.</para>
+		</sect2>
+	</sect1>
+
+	<sect1 id="command_reference"><title>&cs;-Befehlsreferenz</title>
+		<para>&cs; stellt ein internes Python-Modul namens <literal>capisuite</literal> zur Verfügung,
+        das ganz normal mit <literal>import capisuite</literal> importiert werden kann.
+		Intern bedeutet, dass es in das &cs;-Binary einkompiliert ist und dass es nur gefunden wird, wenn
+        &cs; das Skript interpretiert.</para>
+
+		<para>Eine komplette Referenz aller Funktionen dieses Moduls wird automatisch aus den &cs;-Sourcen
+        generiert, sodass Sie es im Referenzhandbuch lokal unter
+        <ulink url="../reference/group__python.html"/> oder online unter
+		<ulink url="http://www.capisuite.de/reference/group__python.html"/> finden.</para>
+
+		<para>Da es keinen Sinn macht, die Informationen hier doppelt zu halten, schauen Sie sie sich bitte
+        dort an.</para>
+
+		<note><para>Diese Funktionen sind intern in C implementiert, sodass das Referenz-Dokument die
+        C-Funktionsköpfe anstelle der Köpfe, wie sie in Python definiert würden, zeigt. Ignorieren Sie
+        daher die dort gezeigten Funktionsköpfe und schauen Sie sich nur die Beschreibungen und die Parameter
+		unter <emphasis>args</emphasis> an. Wenn dies zu verwirrend ist, sagen Sie mir dies bitte.
+        Vielleicht finde ich irgendwann eine bessere Lösung, um das Dokument automatisch zu generieren...
+        </para></note>
+	</sect1>
+
+</chapter>
+<appendix id="acknowledgements"><title>Danksagungen</title>
+	<para>&cs; wurde als Diplomarbeit im Wintersemester 2002/03 begonnen. Ich möchte den folgenden Leuten
+    für ihre Hilfe danken:</para>
+	
+	<itemizedlist>
+		<listitem><para>Karsten Keil von der SUSE Linux AG (mein Betreuer der Arbeit) für seine 
+        unschätzbare Unterstützung und Geduld beim Beantworten meiner vielen ISDN-Fragen, beim Testen
+		und für seine Vorschäge bzgl. der Architektur von &cs;</para></listitem>
+
+		<listitem><para>Prof. Dr. Wolfgang Jürgensen von der Fachhochschule Landshut (mein Betreuer von der FH)
+        für seine Hilfe bei ISDN-Fragen während der Arbeit und für die Vermittlung der ISDN-Grundlagen in seiner
+	Vorlesung</para></listitem>
+
+		<listitem><para>Prof. Dr. Peter Scholz von der FH Landshut (zweiter Betreuer der FH)
+        für seine Unterstützung und seine Vorschläge</para></listitem>
+
+		<listitem><para>meiner Freundin Claudia und ihrer Schwester Bethina für das Korrekturlesen
+        meiner Arbeit</para></listitem>
+
+		<listitem><para>Peter Reinhart von SUSE für das Korrekturlesen meiner Arbeit</para></listitem>
+
+		<listitem><para>vielen Kollegen bei SUSE für ihre Hilfe bei technischen Problemen, insbesondere
+        Andreas Jaeger, Andreas Schwab, Thorsten Kukuk und Andi Kleen</para></listitem>
+
+		<listitem><para>Achim Bohnet, weil er der erste aus der Community war, der versucht hat,
+        die CVS-Version zu kompilieren und der einige Verbesserungsvorschläge gemacht hat</para></listitem>
+	</itemizedlist>
+
+	<para>Seit ich &cs; veröffentlicht habe, haben viele andere Benutzer getestet, Fehler berichtet und
+	Lösungen und neuen Code zur Verfügung gestellt. Ich werde sie nicht alle hier aufzählen, aber dafür
+	jeweils in den ChangeLog- und den NEWS-Dateien, die mit &cs; ausgeliefert werden. Ein großer DANK an
+	all meine User und insbesondere die dort genannten sei trotzdem hier ausgesprochen!</para>
+</appendix>
+
+<appendix id="capicodes"><title>CAPI 2.0 Fehler-Codes</title>
+ <para>Die hier verwendete CAPI-Schnittstelle hat ihre eigene Kodierung der Standard-ISDN-Fehler-Codes.
+ Die meisten Fehler, die im <xref linkend="capicodes_general"/> beschrieben werden, sind nur für
+ Entwickler des &cs;-Kerns interessant. Als Anwender brauchen Sie nur die Codes wie
+ <xref linkend="capicodes_connection"/>, da sie in den Python-Funktionen von &cs; wie
+ <function>capisuite.disconnect</function> verwendet werden.</para>
+
+ <para>Sie finden weiter unten eine Liste aller Codes und eine kurze Beschreibung. Eine detaillierte 
+ Beschreibung der CAPI-Codes finden Sie in der CAPI-Spezifikation, die Sie unter
+ <ulink url="http://www.capi.org"/> bekommen.</para>
+
+ <para>Alle Nummern sind <emphasis>hexadecimal</emphasis> angegeben!</para>
+
+ <section id="capicodes_connection"><title>CAPI-Fehler, die Verbindungsprobleme beschreiben</title>
+
+ 	<para>Alle hier beschriebenen Fehler deuten auf Verbindungsprobleme hin. Diese Fehler sind auch für
+	Skript-Schreiber interessant, da sie von einigen &cs;-Python-Funktionen zurück gegeben werden.
+	Siehe <xref linkend="command_reference"/> für weitere Details.</para>
+
+	<section id="capicodes_protocol"><title>Protokoll-Fehler</title>
+		<para>Protokoll-Fehler deuten auf übertragungsfehler hin. Es werden hier nur Meldungen des 
+		transparenten (Sprache) und des Fax-Protokolls, die von &cs; gesprochen werden, angezeigt.</para>
+
+         <itemizedlist>
+           <listitem><para><literal>0</literal> - Normal call clearing, no error</para></listitem>
+           <listitem><para><literal>3301</literal> - Protocol error layer 1 (broken line or B-channel removed by signalling protocol)</para></listitem>
+           <listitem><para><literal>3302</literal> - Protocol error layer 2</para></listitem>
+           <listitem><para><literal>3303</literal> - Protocol error layer 3</para></listitem>
+           <listitem><para><literal>3304</literal> - Another application got that call</para></listitem>
+           <listitem><para><literal>3311</literal> - T.30 (fax) error: Connection not successful (remote station is not a G3 fax device)</para></listitem>
+           <listitem><para><literal>3312</literal> - T.30 (fax) error: Connection not successful (training error)</para></listitem>
+           <listitem><para><literal>3313</literal> - T.30 (fax) error: Disconnect before transfer (remote station doesn't support transfer mode, e.g. wrong resolution)</para></listitem>
+           <listitem><para><literal>3314</literal> - T.30 (fax) error: Disconnect during transfer (remote abort)</para></listitem>
+           <listitem><para><literal>3315</literal> - T.30 (fax) error: Disconnect during transfer (remote procedure error)</para></listitem>
+           <listitem><para><literal>3316</literal> - T.30 (fax) error: Disconnect during transfer (local transmit data underflow)</para></listitem>
+           <listitem><para><literal>3317</literal> - T.30 (fax) error: Disconnect during transfer (local receive data overflow)</para></listitem>
+           <listitem><para><literal>3318</literal> - T.30 (fax) error: Disconnect during transfer (local abort)</para></listitem>
+           <listitem><para><literal>3319</literal> - T.30 (fax) error: Illegal parameter coding (e.g. defective SFF file)</para></listitem>
+		</itemizedlist>
+	</section>
+	<section id="capicodes_isdn"><title>ISDN-Fehler-Codes</title>
+
+	<para>Diese Codes sind ISDN-Fehler-Codes, die im Standard ETS 300 102-01 im Detail beschrieben sind. 
+    Er ist momentan für den privaten Gebrauch kostenlos unter 	<ulink url="http://www.etsi.org"/> 
+    erhältlich. Details, wie die ISDN-Codes auf die CAPI-Nummern gemappt werden, finden Sie in der
+    CAPI-Spezifikation, Parameter "Info".</para>
+
+	<itemizedlist>
+		<listitem><para><literal>3400</literal> - Normal termination, no reason available</para></listitem>
+		<listitem><para><literal>3480</literal> - Normal termination</para></listitem>
+		<listitem><para><literal>3481</literal> - Unallocated (unassigned) number</para></listitem>
+		<listitem><para><literal>3482</literal> - No route to specified transit network</para></listitem>
+		<listitem><para><literal>3483</literal> - No route to destination</para></listitem>
+		<listitem><para><literal>3486</literal> - Channel unacceptable</para></listitem>
+		<listitem><para><literal>3487</literal> - Call awarded and being delivered in an established channel</para></listitem>
+		<listitem><para><literal>3490</literal> - Normal call clearing</para></listitem>
+		<listitem><para><literal>3491</literal> - User busy</para></listitem>
+		<listitem><para><literal>3492</literal> - No user responding</para></listitem>
+		<listitem><para><literal>3493</literal> - No answer from user (user alerted)</para></listitem>
+		<listitem><para><literal>3495</literal> - Call rejected</para></listitem>
+		<listitem><para><literal>3496</literal> - Number changed</para></listitem>
+		<listitem><para><literal>349A</literal> - Non-selected user clearing</para></listitem>
+		<listitem><para><literal>349B</literal> - Destination out of order</para></listitem>
+		<listitem><para><literal>349C</literal> - Invalid number format</para></listitem>
+		<listitem><para><literal>349D</literal> - Facility rejected</para></listitem>
+		<listitem><para><literal>349E</literal> - Response to STATUS ENQUIRY</para></listitem>
+		<listitem><para><literal>349F</literal> - Normal, unspecified</para></listitem>
+		<listitem><para><literal>34A2</literal> - No circuit / channel available</para></listitem>
+		<listitem><para><literal>34A6</literal> - Network out of order</para></listitem>
+		<listitem><para><literal>34A9</literal> - Temporary failure</para></listitem>
+		<listitem><para><literal>34AA</literal> - Switching equipment congestion</para></listitem>
+		<listitem><para><literal>34AB</literal> - Access information discarded</para></listitem>
+		<listitem><para><literal>34AC</literal> - Requested circuit / channel not available</para></listitem>
+		<listitem><para><literal>34AF</literal> - Resources unavailable, unspecified</para></listitem>
+		<listitem><para><literal>34B1</literal> - Quality of service unavailable</para></listitem>
+		<listitem><para><literal>34B2</literal> - Requested facility not subscribed</para></listitem>
+		<listitem><para><literal>34B9</literal> - Bearer capability not authorized</para></listitem>
+		<listitem><para><literal>34BA</literal> - Bearer capability not presently available</para></listitem>
+		<listitem><para><literal>34BF</literal> - Service or option not available, unspecified</para></listitem>
+		<listitem><para><literal>34C1</literal> - Bearer capability not implemented</para></listitem>
+		<listitem><para><literal>34C2</literal> - Channel type not implemented</para></listitem>
+		<listitem><para><literal>34C5</literal> - Requested facility not implemented</para></listitem>
+		<listitem><para><literal>34C6</literal> - Only restricted digital information bearer capability is available</para></listitem>
+		<listitem><para><literal>34CF</literal> - Service or option not implemented, unspecified</para></listitem>
+		<listitem><para><literal>34D1</literal> - Invalid call reference value</para></listitem>
+		<listitem><para><literal>34D2</literal> - Identified channel does not exist</para></listitem>
+		<listitem><para><literal>34D3</literal> - A suspended call exists, but this call identity does not</para></listitem>
+		<listitem><para><literal>34D4</literal> - Call identity in use</para></listitem>
+		<listitem><para><literal>34D5</literal> - No call suspended</para></listitem>
+		<listitem><para><literal>34D6</literal> - Call having the requested call identity has been cleared</para></listitem>
+		<listitem><para><literal>34D8</literal> - Incompatible destination</para></listitem>
+		<listitem><para><literal>34DB</literal> - Invalid transit network selection</para></listitem>
+		<listitem><para><literal>34DF</literal> - Invalid message, unspecified</para></listitem>
+		<listitem><para><literal>34E0</literal> - Mandatory information element is missing</para></listitem>
+		<listitem><para><literal>34E1</literal> - Message type non-existent or not implemented</para></listitem>
+		<listitem><para><literal>34E2</literal> - Message not compatible with call state or message type non-existent or not implemented</para></listitem>
+		<listitem><para><literal>34E3</literal> - Information element non-existent or not implemented</para></listitem>
+		<listitem><para><literal>34E4</literal> - Invalid information element contents</para></listitem>
+		<listitem><para><literal>34E5</literal> - Message not compatible with call state</para></listitem>
+		<listitem><para><literal>34E6</literal> - Recovery on timer expiry</para></listitem>
+		<listitem><para><literal>34EF</literal> - Protocol error, unspecified</para></listitem>
+		<listitem><para><literal>34FF</literal> - Interworking, unspecified</para></listitem>
+	</itemizedlist> 
+	</section>
+ </section>
+
+ <section id="capicodes_general"><title>Interne CAPI-Fehler</title>
+ 	<para>Diese Fehler sind hauptsächlich für Entwickler der &cs;-Kerns interessant. Wenn Sie ein Anwender
+    sind, werden Sie sie normalerweise nicht brauchen.</para>
+
+	<section id="capicodes_info"><title>Informative Werte (kein Fehler)</title>
+	<para>Diese Werte sind nur Warnings und können in ausführlichem &cs;-Log in Meldungen von der CAPI
+    vorkommen.</para>
+	<itemizedlist>
+		<listitem><para><literal>0000</literal> - No error, request accepted</para></listitem>
+		<listitem><para><literal>0001</literal> - NCPI not supported by current protocol, NCPI ignored</para></listitem>
+		<listitem><para><literal>0002</literal> - Flags not supported by current protocol, flags ignored</para></listitem>
+		<listitem><para><literal>0003</literal> - Alert already sent by another application</para></listitem>
+	</itemizedlist>
+	</section>
+	<section id="capicodes_register"><title>Fehler bezüglich CAPI_REGISTER</title>
+		<para>Diese Fehler können auftreten, wenn die Anwendung startet und deuten meistens auf Probleme
+        mit Ihrer Treiber-Installation hin.</para>
+
+		<itemizedlist>
+			<listitem><para><literal>1001</literal> - Too many applications.</para></listitem>
+			<listitem><para><literal>1002</literal> - Logical Block size too small; must be at least 128 bytes.</para></listitem>
+			<listitem><para><literal>1003</literal> - Buffer exceeds 64 kbytes.</para></listitem>
+			<listitem><para><literal>1004</literal> - Message buffer size too small, must be at least 1024 bytes.</para></listitem>
+			<listitem><para><literal>1005</literal> - Max. number of logical connections not supported.</para></listitem>
+			<listitem><para><literal>1006</literal> - reserved (unknown error).</para></listitem>
+			<listitem><para><literal>1007</literal> - The message could not be accepted because of an internal busy condition.</para></listitem>
+			<listitem><para><literal>1008</literal> - OS Resource error (out of memory?).</para></listitem>
+			<listitem><para><literal>1009</literal> - CAPI not installed.</para></listitem>
+			<listitem><para><literal>100A</literal> - Controller does not support external equipment.</para></listitem>
+			<listitem><para><literal>100B</literal> - Controller does only support external equipment.</para></listitem>
+		</itemizedlist>
+	</section>
+	<section id="capicodes_messages"><title>Nachrichtenaustausch-Fehler</title>
+		<para>Diese Fehler sind wirklich intern: sie treten auf, wenn die Anwendung die CAPI falsch
+        aufruft. Wenn sie auftreten, ist das meisten ein Bug, den sie den &cs;-Entwicklern melden sollten.
+        </para>
+
+		<itemizedlist>
+			<listitem><para><literal>1101</literal> - Illegal application number.</para></listitem>
+			<listitem><para><literal>1102</literal> - Illegal command or subcommand, or message length less than 12 octets.</para></listitem>
+			<listitem><para><literal>1103</literal> - The message could not be accepted because of a queue full condition.</para></listitem>
+			<listitem><para><literal>1104</literal> - Queue is empty.</para></listitem>
+			<listitem><para><literal>1105</literal> - Queue overflow: a message was lost!!</para></listitem>
+			<listitem><para><literal>1106</literal> - Unknown notification parameter.</para></listitem>
+			<listitem><para><literal>1107</literal> - The message could not be accepted because on an internal busy condition.</para></listitem>
+			<listitem><para><literal>1108</literal> - OS resource error (out of memory?).</para></listitem>
+			<listitem><para><literal>1109</literal> - CAPI not installed.</para></listitem>
+			<listitem><para><literal>110A</literal> - Controller does not support external equipment.</para></listitem>
+			<listitem><para><literal>110B</literal> - Controller does only support external equipment.</para></listitem>
+		</itemizedlist>
+	</section>
+	<section id="capicodes_resource"><title>Resource/Coding-Fehler</title>
+		<para>Diese Fehler treten auf, wenn die Anwendung versucht, eine nicht verfügbare Resource zu 
+        benutzen. Dies sind meistens auch Bugs in der Anwendung. Melden Sie sie uns bitte.</para>
+
+		<itemizedlist>
+			<listitem><para><literal>2001</literal> - Message not supported in current state</para></listitem>
+			<listitem><para><literal>2002</literal> - Illegal Controller / PLCI / NCCI</para></listitem>
+			<listitem><para><literal>2003</literal> - Out of PLCI</para></listitem>
+			<listitem><para><literal>2004</literal> - Out of NCCI</para></listitem>
+			<listitem><para><literal>2005</literal> - Out of LISTEN</para></listitem>
+			<listitem><para><literal>2007</literal> - llegal message parameter coding</para></listitem>
+		</itemizedlist>
+	</section>
+	<section id="capicodes_service"><title>Fehler bezüglich angeforderter Services</title>
+		<para>Diese Fehler treten auf, wenn die Anwendung versucht, einen Service falsch anzufordern.
+		Auch dies sind Bugs, die Sie uns melden sollten.</para>
+
+		<itemizedlist>
+			<listitem><para><literal>3001</literal> - B1 protocol not supported</para></listitem>
+			<listitem><para><literal>3002</literal> - B2 protocol not supported</para></listitem>
+			<listitem><para><literal>3003</literal> - B3 protocol not supported</para></listitem>
+			<listitem><para><literal>3004</literal> - B1 protocol parameter not supported</para></listitem>
+			<listitem><para><literal>3005</literal> - B2 protocol parameter not supported</para></listitem>
+			<listitem><para><literal>3006</literal> - B3 protocol parameter not supported</para></listitem>
+			<listitem><para><literal>3007</literal> - B protocol combination not supported</para></listitem>
+			<listitem><para><literal>3008</literal> - NCPI not supported</para></listitem>
+			<listitem><para><literal>3009</literal> - CIP Value unknown</para></listitem>
+			<listitem><para><literal>300A</literal> - Flags not supported (reserved bits)</para></listitem>
+			<listitem><para><literal>300B</literal> - Facility not supported</para></listitem>
+			<listitem><para><literal>300C</literal> - Data length not supported by current protocol</para></listitem>
+			<listitem><para><literal>300D</literal> - Reset procedure not supported by current protocol</para></listitem>
+		</itemizedlist>
+	</section>
+ </section>
+</appendix>
+
+</book>
